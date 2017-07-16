@@ -1,0 +1,7 @@
+= Dynamic Web Documents
+
+A web application to find and edit documents.
+
+Documents will be markdown, asciidoc, sphinx, bash scritps, go programs...
+
+
