@@ -5,18 +5,21 @@
   </span>
 </div>
 
-<h1>Found</h1>
+<br>
 
-<span *ngFor="let it of (model.entrances | keys)">
-  <h2>{{it.key}}</h2>
-  <span *ngFor="let k2 of (it.value | keys)">
-    <ul>
-    <li>{{k2.key}}</li>
-    <ul>
-  <span *ngFor="let val of k2.value">
+<div *ngFor="let f_l0 of model.foundList" class="panel panel-primary">
+  <div class="panel-heading">
+    <h2 class="panel-title">{{f_l0.key}}</h2>
+  </div>
+  <div class="panel-body">
+
+    <span *ngFor="let f_l1 of f_l0.val">
+    <h2>{{f_l1.key}}</h2>
+    <span *ngFor="let val of f_l1.val">
       <li>{{val}}</li>
-  </span>
-</ul>
-</ul>
-</span>
-</span>
+    </span>
+    </span>
+
+
+  </div>
+</div>

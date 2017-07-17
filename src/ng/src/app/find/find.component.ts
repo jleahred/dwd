@@ -1,36 +1,37 @@
 import { window } from 'rxjs/operator/window';
 import { Component, OnInit } from '@angular/core';
 import { element } from 'protractor';
+import { FindService, Found } from './find.service';
 
 class Model {
-  entrances: { [key: string]: { [key: string]: [string] } } = {}
+  foundList: Found[] = [];
 }
 
 
 @Component({
   selector: 'app-find',
   templateUrl: './find.component.html',
-  styleUrls: ['./find.component.css']
+  styleUrls: ['./find.component.css'],
+  providers: [FindService]
 })
 export class FindComponent implements OnInit {
 
   model = new Model;
+  fs: FindService;
 
-  constructor() { }
-
-  ngOnInit() {
-    // remove, just for testing
-    this.insertElement("html", "src", ["lulululu", "lalalala"]);
-    this.insertElement("html", "src2", ["lulululu22", "lulululu22"]);
-    this.insertElement("adoc", "doc", ["lulululu33", "lulululu22"]);
-    this.insertElement("adoc", "doc2", ["lulululu44"]);
-    this.insertElement("adoc", "doc3", ["2222"]);
+  constructor(fs: FindService) {
+    this.fs = fs;
+    this.fs.onEntrance.subscribe(elem => this.insertElement(elem));
+    this.fs.onClear.subscribe(() => this.model.foundList = []);
   }
 
-  insertElement(key1: string, key2: string, value: [string]) {
-    if (this.model.entrances[key1] == null) {
-      this.model.entrances[key1] = {};
-    }
-    this.model.entrances[key1][key2] = value;
+  ngOnInit() {
+    this.fs.find('text to find');
+    this.fs.find('text to find');
+  }
+
+  insertElement(found: Found) {
+    console.log(found);
+    this.model.foundList.push(found);
   }
 }
