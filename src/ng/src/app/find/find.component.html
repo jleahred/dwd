@@ -6,3 +6,17 @@
 </div>
 
 <h1>Found</h1>
+
+<span *ngFor="let it of (model.entrances | keys)">
+  <h2>{{it.key}}</h2>
+  <span *ngFor="let k2 of (it.value | keys)">
+    <ul>
+    <li>{{k2.key}}</li>
+    <ul>
+  <span *ngFor="let val of k2.value">
+      <li>{{val}}</li>
+  </span>
+</ul>
+</ul>
+</span>
+</span>
