@@ -4,7 +4,7 @@ import { element } from 'protractor';
 import { FindService, Found } from './find.service';
 
 class Model {
-  founds: { [key: string]: { [key: string]: [string] } } = {}
+  founds: { [key: string]: { [key: string]: [string] } } = {};
 }
 
 
@@ -27,8 +27,6 @@ export class FindComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.fs.find('text to find');
-    this.fs.find('this.text2find');
   }
 
   insertElement(found: Found) {
@@ -38,8 +36,8 @@ export class FindComponent implements OnInit {
     if (this.model.founds[found.key0][found.key1] === undefined) {
       this.model.founds[found.key0][found.key1] = [] as [string];
     }
-    for (let i in found.val) {
-      this.model.founds[found.key0][found.key1].push(found.val[i]);
+    for (const v of found.val) {
+      this.model.founds[found.key0][found.key1].push(v);
     }
   }
 

@@ -1,7 +1,7 @@
 <div class="input-group">
   <input type="text" class="form-control" placeholder="Text to find" [(ngModel)]="text2find" (keyup.enter)="onModifText2Find($event)">
   <span class="input-group-addon">
-    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+    <span class="glyphicon glyphicon-search" aria-hidden="true" (mousedown)="onModifText2Find()"></span>
   </span>
 </div>
 
