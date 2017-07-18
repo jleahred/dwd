@@ -1,5 +1,5 @@
 <div class="input-group">
-  <input type="text" class="form-control" placeholder="Text to find">
+  <input type="text" class="form-control" placeholder="Text to find" [(ngModel)]="text2find" (keyup.enter)="onModifText2Find($event)">
   <span class="input-group-addon">
     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
   </span>
@@ -7,17 +7,18 @@
 
 <br>
 
-<div *ngFor="let f_l0 of model.foundList" class="panel panel-primary">
+
+<div *ngFor="let f0 of model.founds | keys" class="panel panel-primary">
   <div class="panel-heading">
-    <h2 class="panel-title">{{f_l0.key}}</h2>
+    <h2 class="panel-title">{{f0.key}}</h2>
   </div>
   <div class="panel-body">
 
-    <span *ngFor="let f_l1 of f_l0.val">
-    <h2>{{f_l1.key}}</h2>
-    <span *ngFor="let val of f_l1.val">
-      <li>{{val}}</li>
-    </span>
+    <span *ngFor="let f1 of f0.value | keys">
+          <h3>{{f1.key}}</h3>
+      <span *ngFor="let v of f1.value">
+            <li>{{v}}</li>
+      </span>
     </span>
 
 
