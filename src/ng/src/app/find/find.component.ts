@@ -41,9 +41,7 @@ export class FindComponent implements OnInit {
     }
   }
 
-  onModifText2Find(event: KeyboardEvent) {
-    console.log(event);
-    console.log(this.text2find);
+  onModifText2Find(event: any) {
     this.fs.find(this.text2find);
   }
 }
