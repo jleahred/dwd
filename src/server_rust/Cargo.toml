@@ -7,9 +7,4 @@ authors = ["maiquel <jleahred@gmail.com>"]
 iron ="*"
 staticfile = "*"
 mount = "*"
-
-# [dependencies.iron]
-# version = "*"
-
-# [dependencies.mount]
-# git = "https://github.com/iron/mount.git"
+ws = "*"
