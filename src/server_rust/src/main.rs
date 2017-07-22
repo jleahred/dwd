@@ -4,44 +4,43 @@ extern crate mount;
 extern crate ws;
 
 
+use std::thread;
 use iron::prelude::*;
 use std::path::Path;
 use mount::Mount;
 use staticfile::Static;
 use ws::listen;
 
-const SERVER_SOCKET: &str = "0.0.0.0:8080";
 
 fn main() {
-    let mut static_path = Mount::new();
+    const HTTP_SOCKET: &str = "0.0.0.0:8080";
+    const WS_SOCKET: &str = "0.0.0.0:8081";
 
-    static_path.mount("/", Static::new(Path::new("http_static")));
-    println!("server running on {}", SERVER_SOCKET);
-    Iron::new(static_path).http(SERVER_SOCKET).unwrap();
+    let http = thread::spawn(|| run_http_server(HTTP_SOCKET));
+    let ws = thread::spawn(|| run_web_socket(WS_SOCKET));
+    let _ = http.join();
+    let _ = ws.join();
 }
 
 
-// fn main() {
+fn run_http_server(http_socket: &str) {
+    let mut static_path = Mount::new();
 
-//     // Setup logging
-//     env_logger::init().unwrap();
+    static_path.mount("/", Static::new(Path::new("http_static")));
+    println!("http server running on {}", http_socket);
+    Iron::new(static_path).http(http_socket).unwrap();
 
-//     // Listen on an address and call the closure for each connection
-//     if let Err(error) = listen("127.0.0.1:3012", |out| {
+}
 
-//         // The handler needs to take ownership of out, so we use move
-//         move |msg| {
+fn run_web_socket(ws_socket: &str) {
+    println!("WS server running on {}", ws_socket);
+    if let Err(error) = listen(ws_socket, |out| {
+        move |msg| {
+            println!("Server got message '{}'. ", msg);
+            out.send(format!("99999999999 + {}", msg))
+        }
 
-//             // Handle messages received on this connection
-//             println!("Server got message '{}'. ", msg);
-
-//             // Use the out channel to send messages back
-//             out.send(msg)
-//         }
-
-//     }) {
-//         // Inform the user of failure
-//         println!("Failed to create WebSocket due to {:?}", error);
-//     }
-
-// }
+    }) {
+        println!("Failed to create WebSocket due to {:?}", error);
+    }
+}

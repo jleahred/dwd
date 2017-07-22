@@ -17,16 +17,17 @@ class Model {
 export class FindComponent implements OnInit {
 
   model = new Model;
-  @Input() text2find: string;
-  fs: FindService;
 
-  constructor(fs: FindService) {
-    this.fs = fs;
-    this.fs.onEntrance.subscribe(elem => this.insertElement(elem));
-    this.fs.onClear.subscribe(() => this.model.founds = {});
+  text2find: string;
+
+  constructor(private fs: FindService) {
   }
 
   ngOnInit() {
+    this.fs.onEntrance.subscribe(elem => {
+      this.insertElement(elem);
+    });
+    this.fs.onClear.subscribe(() => this.model.founds = {});
   }
 
   insertElement(found: Found) {
@@ -39,6 +40,10 @@ export class FindComponent implements OnInit {
     for (const v of found.val) {
       this.model.founds[found.key0][found.key1].push(v);
     }
+
+    //  dirty trick
+    this.model.founds = JSON.parse(JSON.stringify(this.model.founds));
+    //  dirty trick
   }
 
   onModifText2Find(event: any) {

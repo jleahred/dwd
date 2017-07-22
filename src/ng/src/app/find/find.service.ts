@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 
+import { ws_onmessage, ws_send } from '../ws';
 
 
 export class Found {
@@ -19,40 +20,17 @@ export class FindService {
   private _onClear = new Subject();
   onClear = this._onClear.asObservable();
 
-  constructor() { }
+  constructor(private ngZone: NgZone) {
+    ws_onmessage.subscribe(msg => {
+      this.ngZone.run(() => this._onEntrance.next(msg));
+    });
+  }
+
 
   find(text2find: string) {
     this._onClear.next();
-
-    this._onEntrance.next(
-      {
-        key0: text2find,
-        key1: text2find,
-        val: ['aaa', 'bbbb']
-      },
-    );
-
-    this._onEntrance.next(
-      {
-        key0: 'doc',
-        key1: 'html',
-        val: ['aaa', 'bbbb']
-      },
-    );
-    this._onEntrance.next(
-      {
-        key0: 'doc',
-        key1: 'adoc',
-        val: ['cccc', 'dddd']
-      },
-    );
-    this._onEntrance.next(
-      {
-        key0: 'script',
-        key1: 'go',
-        val: ['eeee', 'ffff']
-      },
-    );
-
+    ws_send(text2find);
   }
 }
+
+
