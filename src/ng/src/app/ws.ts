@@ -1,3 +1,4 @@
+import { parse, } from 'ts-node';
 import { Subject } from 'rxjs/Subject';
 import { cfgtesting } from '../config';
 
@@ -15,17 +16,17 @@ if (cfgtesting() === false) {
   ws.onopen = (event: Event) => {
     console.log('Socket has been opened!');
   };
-  ws.onmessage = (msg: any) => {
-    // JSON.parse(event);
+  ws.onmessage = (msg: MessageEvent) => {
+    console.log(msg.data);
     // console.log(msg.data);
-    // _onMessage.next(JSON.parse(msg.data));
-    _onMessage.next(
-      {
-        key0: msg.data,
-        key1: 'html',
-        val: ['aaa', 'bbbb']
-      },
-    );
+    _onMessage.next(JSON.parse(msg.data));
+    // _onMessage.next(
+    //   {
+    //     key0: msg.data,
+    //     key1: 'html',
+    //     val: ['aaa', 'bbbb']
+    //   },
+    // );
   };
 }
 
@@ -34,11 +35,18 @@ if (cfgtesting() === false) {
 
 
 
-export function ws_send(msg: any) {
+export function ws_send(topic: string, type: string, data: any) {
   if (cfgtesting()) {
-    ws_send_testing(msg);
+    ws_send_testing(data);
   } else {
-    ws.send(msg);
+    ws.send(
+      JSON.stringify({
+        'topic': topic,
+        'type': type,
+        'data': JSON.stringify(data)
+      })
+
+    );
   }
 }
 
