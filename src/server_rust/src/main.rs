@@ -3,6 +3,10 @@ extern crate staticfile;
 extern crate mount;
 extern crate ws;
 
+#[macro_use]
+extern crate serde_derive;
+
+
 
 use std::thread;
 use iron::prelude::*;
@@ -10,6 +14,10 @@ use std::path::Path;
 use mount::Mount;
 use staticfile::Static;
 use ws::listen;
+
+mod wss;
+mod find;
+
 
 
 fn main() {
@@ -32,12 +40,13 @@ fn run_http_server(http_socket: &str) {
 
 }
 
+
 fn run_web_socket(ws_socket: &str) {
     println!("WS server running on {}", ws_socket);
     if let Err(error) = listen(ws_socket, |out| {
         move |msg| {
             println!("Server got message '{}'. ", msg);
-            out.send(format!("99999999999 + {}", msg))
+            wss::process_ws_msg(msg, &out)
         }
 
     }) {
