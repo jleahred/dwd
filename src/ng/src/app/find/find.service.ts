@@ -29,7 +29,7 @@ export class FindService {
 
   find(text2find: string) {
     this._onClear.next();
-    ws_send('Find', 'Find', text2find);
+    ws_send({ 'type': 'Find', 'text2find': text2find });
   }
 }
 

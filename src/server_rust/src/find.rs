@@ -1,5 +1,8 @@
 extern crate serde_json;
 
+use std::thread;
+
+
 
 // use self::serde_json::Error;
 
@@ -17,11 +20,23 @@ pub struct Found {
 
 
 
-pub fn process_find(_: &str, ws_sender: &::ws::Sender) -> Result<(), ::ws::Error> {
-    let data = ::wss::WSMsgData::Found(Found {
-        key0: "key0".to_owned(),
-        key1: "key1".to_owned(),
-        val: vec!["asfsadf".to_owned(), "sadfasdfasdf".to_owned()],
+pub fn process_find(_: &str, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
+    let ws_out_copy = ws_out.clone();
+    thread::spawn(move || {
+        let _ = ::wss::send_data(::wss::WSMsgData::Found(Found {
+                                     key0: "key0".to_owned(),
+                                     key1: "key1".to_owned(),
+                                     val: vec!["aaaaaaaaaaaa".to_owned(), "bbbbbbbbbbb".to_owned()],
+                                 }),
+                                 &ws_out_copy);
+        thread::sleep_ms(1000);
+        let _ = ::wss::send_data(::wss::WSMsgData::Found(Found {
+                                     key0: "key00".to_owned(),
+                                     key1: "key11".to_owned(),
+                                     val: vec!["aaaaaaaaaaaa".to_owned(), "bbbbbbbbbbb".to_owned()],
+                                 }),
+                                 &ws_out_copy);
     });
-    ::wss::send_data(::wss::Topic::Find, data, ws_sender)
+
+    Ok(())
 }

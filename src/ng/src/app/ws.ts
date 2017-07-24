@@ -12,7 +12,7 @@ export const ws_onmessage = _onMessage.asObservable();
 
 if (cfgtesting() === false) {
 
-  ws = new WebSocket('ws://localhost:8081/');
+  ws = new WebSocket('ws://127.0.0.1:8081/');
   ws.onopen = (event: Event) => {
     console.log('Socket has been opened!');
   };
@@ -35,18 +35,11 @@ if (cfgtesting() === false) {
 
 
 
-export function ws_send(topic: string, type: string, data: any) {
+export function ws_send(data: any) {
   if (cfgtesting()) {
     ws_send_testing(data);
   } else {
-    ws.send(
-      JSON.stringify({
-        'topic': topic,
-        'type': type,
-        'data': JSON.stringify(data)
-      })
-
-    );
+    ws.send(JSON.stringify(data))
   }
 }
 
