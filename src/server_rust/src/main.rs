@@ -25,6 +25,8 @@ mod wss;
 mod find;
 
 
+const EXT_FILES: &'static [&str] = &["html", "adoc", "toml", "rs"];
+
 
 fn main() {
     const HTTP_SOCKET: &str = "0.0.0.0:8080";

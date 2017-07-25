@@ -24,14 +24,9 @@ fn distribute_msg(msg: WSMsgData, ws_out: &::ws::Sender) -> Result<(), ::ws::Err
     match msg {
         WSMsgData::Find { text2find: data } => ::find::process_find(&data, ws_out),
 
-
         //  Only output, ERROR ------------------------------
-        WSMsgData::Log { log_line: line } => send_log(&format!("Received Log??? {}",
-                                       line),
-                      ws_out),
-        WSMsgData::Found ( found ) => send_log(&format!("Received Found??? {:?}",
-                                       found),
-                      ws_out)
+        WSMsgData::Log { log_line: line } => send_log(&format!("Received Log??? {}", line), ws_out),
+        WSMsgData::Found(found) => send_log(&format!("Received Found??? {:?}", found), ws_out),
         // data => {
         //     send_log(&format!("type {:?} not supported  or incorrect fields for this \
         //                                 type",
@@ -64,8 +59,7 @@ pub fn process_ws_msg(msg: ::ws::Message, ws_out: &::ws::Sender) -> Result<(), :
 
 pub fn send_data(data: WSMsgData, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
     let msg_json = serde_json::to_string(&data)
-        // .unwrap();
-    .unwrap_or("Internal error creating output message!!!".to_owned());
+        .unwrap_or("Internal error creating output message!!!".to_owned());
     ws_out.send(msg_json)
 }
 
@@ -74,6 +68,6 @@ fn msg_log(info: &str) -> ::wss::WSMsgData {
     WSMsgData::Log { log_line: info.to_owned() }
 }
 
-pub fn send_log(log_line: &str, ws_out: &::ws::Sender) -> Result<(), ::ws::Error>{
+pub fn send_log(log_line: &str, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
     send_data(msg_log(log_line), ws_out)
 }
