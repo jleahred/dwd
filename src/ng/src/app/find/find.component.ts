@@ -3,8 +3,12 @@ import { Component, OnInit, Input } from '@angular/core';
 import { element } from 'protractor';
 import { FindService, Found } from './find.service';
 
+export class Item {
+  text: string;
+}
+
 class Model {
-  founds: { [key: string]: { [key: string]: [string] } } = {};
+  founds: { [key: string]: { [key: string]: [Item] } } = {};
 }
 
 
@@ -35,11 +39,9 @@ export class FindComponent implements OnInit {
       this.model.founds[found.key0] = {};
     }
     if (this.model.founds[found.key0][found.key1] === undefined) {
-      this.model.founds[found.key0][found.key1] = [] as [string];
+      this.model.founds[found.key0][found.key1] = [] as [Item];
     }
-    for (const v of found.val) {
-      this.model.founds[found.key0][found.key1].push(v);
-    }
+    this.model.founds[found.key0][found.key1].push(found.item);
 
     //  dirty trick
     this.model.founds = JSON.parse(JSON.stringify(this.model.founds));

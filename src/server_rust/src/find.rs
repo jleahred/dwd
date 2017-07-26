@@ -6,20 +6,32 @@ use std::thread;
 use std::fs;
 
 
+const EXT_DOC: &'static [&str] = &["html", "adoc", "toml"];
+const EXT_SCRIPTS: &'static [&str] = &["rs"];
 
 
-// use self::serde_json::Error;
+
+
+
+// export class Item {
+//   text: string;
+// }
 
 // export class Found {
 //   key0: string;
 //   key1: string;
-//   val: string[];
+//   item: Item;
 // }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Found {
     pub key0: String,
     pub key1: String,
-    pub val: Vec<String>,
+    pub item: Item,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Item {
+    pub text: String,
 }
 
 
@@ -49,16 +61,25 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender) -> io::Result<()> {
                 let ext = path.extension()
                     .and_then(OsStr::to_str)
                     .unwrap_or("");
-                if ::EXT_FILES.contains(&ext) {
+
+                let group = if EXT_DOC.contains(&ext) {
+                    "DOC"
+                } else if EXT_SCRIPTS.contains(&ext) {
+                    "SCRIPTS"
+                } else {
+                    ""
+                };
+
+                if group.is_empty() == false {
                     let ofile_name = path.file_name()
                         .and_then(OsStr::to_str);
                     match ofile_name {
                         Some(file_name) => {
                             println!("Found: {}", file_name);
                             let data = ::wss::WSMsgData::Found(Found {
-                                key0: "docs".to_owned(),
+                                key0: group.to_owned(),
                                 key1: ext.to_owned(),
-                                val: vec![file_name.to_owned()],
+                                item: Item { text: file_name.to_owned() },
                             });
                             let _ = ::wss::send_data(data, ws_out);
                         }

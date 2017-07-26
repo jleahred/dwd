@@ -2,12 +2,13 @@ import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 
 import { ws_onmessage, ws_send } from '../ws';
+import { Item } from './find.component';
 
 
 export class Found {
   key0: string;
   key1: string;
-  val: string[];
+  item: Item;
 }
 
 

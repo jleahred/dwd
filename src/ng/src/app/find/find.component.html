@@ -16,8 +16,8 @@
 
     <span *ngFor="let f1 of f0.value | keys">
           <h3>{{f1.key}}</h3>
-      <span *ngFor="let v of f1.value">
-            <li>{{v}}</li>
+      <span *ngFor="let item of f1.value">
+            <li><button type="button" class="btn btn-default">{{item.text}}</button></li>
       </span>
     </span>
 

@@ -25,7 +25,6 @@ mod wss;
 mod find;
 
 
-const EXT_FILES: &'static [&str] = &["html", "adoc", "toml", "rs"];
 
 
 fn main() {
