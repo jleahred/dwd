@@ -1,13 +1,3 @@
-<div class="input-group">
-  <input type="text" class="form-control" placeholder="Text to find" [(ngModel)]="text2find" (keyup.enter)="onModifText2Find($event)">
-  <span class="input-group-addon">
-     <span class="glyphicon glyphicon-search" aria-hidden="true" (mousedown)="onModifText2Find($event)"></span>
-  </span>
-</div>
-
-<br>
-
-
 <div *ngFor="let f0 of model.founds | keys" class="panel panel-primary">
   <div class="panel-heading">
     <h2 class="panel-title">{{f0.key}}</h2>

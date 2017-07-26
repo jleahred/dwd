@@ -15,8 +15,7 @@ class Model {
 @Component({
   selector: 'app-find',
   templateUrl: './find.component.html',
-  styleUrls: ['./find.component.css'],
-  providers: [FindService]
+  styleUrls: ['./find.component.css']
 })
 export class FindComponent implements OnInit {
 
