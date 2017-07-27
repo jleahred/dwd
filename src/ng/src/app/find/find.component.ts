@@ -5,6 +5,7 @@ import { FindService, Found } from './find.service';
 
 export class Item {
   text: string;
+  link: string;
 }
 
 class Model {

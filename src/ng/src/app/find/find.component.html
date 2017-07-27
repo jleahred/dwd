@@ -7,7 +7,8 @@
     <span *ngFor="let f1 of f0.value | keys">
           <h3>{{f1.key}}</h3>
       <span *ngFor="let item of f1.value">
-            <li><button type="button" class="btn btn-default">{{item.text}}</button></li>
+            <!-- <li><button type="button" class="btn btn-default">{{item.text}}</button></li> -->
+            <li><a href="{{item.link}}">{{item.text}}</a></li>
       </span>
     </span>
 

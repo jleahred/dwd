@@ -32,6 +32,7 @@ pub struct Found {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Item {
     pub text: String,
+    pub link: String,
 }
 
 
@@ -61,32 +62,30 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender) -> io::Result<()> {
                 let ext = path.extension()
                     .and_then(OsStr::to_str)
                     .unwrap_or("");
-
-                let group = if EXT_DOC.contains(&ext) {
-                    "DOC"
+                let file_name = path.file_name()
+                    .and_then(OsStr::to_str)
+                    .unwrap_or("???");
+                let file_name_path = OsStr::to_str(path.as_os_str()).unwrap_or("???");
+                let ogroup_link = if EXT_DOC.contains(&ext) {
+                    Some(("DOC".to_owned(), format!("doc/{}/{}", ext, file_name_path)))
                 } else if EXT_SCRIPTS.contains(&ext) {
-                    "SCRIPTS"
+                    Some(("SCRIPTS".to_owned(), "".to_owned()))
                 } else {
-                    ""
+                    None
                 };
-
-                if group.is_empty() == false {
-                    let ofile_name = path.file_name()
-                        .and_then(OsStr::to_str);
-                    match ofile_name {
-                        Some(file_name) => {
-                            println!("Found: {}", file_name);
-                            let data = ::wss::WSMsgData::Found(Found {
-                                key0: group.to_owned(),
-                                key1: ext.to_owned(),
-                                item: Item { text: file_name.to_owned() },
-                            });
-                            let _ = ::wss::send_data(data, ws_out);
-                        }
-                        None => {
-                            let _ = ::wss::send_log("Error reading file name", ws_out);
-                        }
+                match ogroup_link {
+                    Some((group, link)) => {
+                        let data = ::wss::WSMsgData::Found(Found {
+                            key0: group.to_owned(),
+                            key1: ext.to_owned(),
+                            item: Item {
+                                text: file_name.to_owned(),
+                                link: link,
+                            },
+                        });
+                        let _ = ::wss::send_data(data, ws_out);
                     }
+                    None => (),
                 }
             }
         }
