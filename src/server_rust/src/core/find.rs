@@ -5,6 +5,7 @@ use std::path::Path;
 use std::thread;
 use std::fs;
 
+use super::proto;
 
 
 
@@ -20,7 +21,7 @@ pub struct Found {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Item {
     pub text: String,
-    pub command: ::wss::MsgIn, //  json format
+    pub command: proto::MsgIn,
 }
 
 
@@ -51,7 +52,7 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender) -> io::Result<()> {
                 match exec_find(&path, ws_out) {
                     Ok(_) => {}
                     Err(e) => {
-                        let _ = ::wss::send_log(&format!("{:?}", e), ws_out);
+                        let _ = super::wss::send_log(&format!("{:?}", e), ws_out);
                     }
                 }
             } else {
@@ -60,15 +61,15 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender) -> io::Result<()> {
                     .unwrap_or("");
                 match ext {
                     "html" => {
-                        let data = ::wss::MsgOut::Found(Found {
+                        let data = proto::MsgOut::Found(Found {
                             key0: "DOC".to_owned(),
                             key1: ext.to_owned(),
                             item: Item {
                                 text: file_name_path.to_owned(),
-                                command: ::wss::MsgIn::Html { file: file_name_path.to_owned() },
+                                command: proto::MsgIn::Html { file: file_name_path.to_owned() },
                             },
                         });
-                        let _ = ::wss::send_data(data, ws_out);
+                        let _ = super::wss::send_data(data, ws_out);
                     }
                     _ => (),
                 };

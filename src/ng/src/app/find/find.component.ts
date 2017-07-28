@@ -51,6 +51,8 @@ export class FindComponent implements OnInit {
 
   onClick(command: any) {
     console.log(command);
+    this.model.founds = {};
+
     ws_send(command);
   }
 }

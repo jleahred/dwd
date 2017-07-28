@@ -8,7 +8,7 @@ import { cfgtesting } from '../config';
 
 let ws: WebSocket;
 
-let _onMessage2: { [type: string]: Subject<any> } = {};
+const _onMessage2: { [type: string]: Subject<any> } = {};
 
 
 if (cfgtesting() === false) {
@@ -19,7 +19,7 @@ if (cfgtesting() === false) {
   };
   ws.onmessage = (msg: MessageEvent) => {
     console.log(msg.data);
-    let rec = JSON.parse(msg.data);
+    const rec = JSON.parse(msg.data);
     if (_onMessage2[rec.type] !== undefined) {
       _onMessage2[rec.type].next(rec);
     } else {
@@ -39,6 +39,6 @@ export function ws_subscribe_type(type: string): Observable<any> {
 
 
 export function ws_send(data: any) {
-  ws.send(JSON.stringify(data))
+  ws.send(JSON.stringify(data));
 }
 

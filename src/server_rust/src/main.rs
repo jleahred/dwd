@@ -22,9 +22,7 @@ use mount::Mount;
 use staticfile::Static;
 use ws::listen;
 
-mod wss;
-mod find;
-mod send_file_cont;
+mod core;
 
 
 
@@ -55,7 +53,7 @@ fn run_web_socket(ws_socket: &str) {
     if let Err(error) = listen(ws_socket, |out| {
         move |msg| {
             println!("Server got message '{}'. ", msg);
-            wss::process_ws_msg(msg, &out)
+            core::wss::process_ws_msg(msg, &out)
         }
 
     }) {
