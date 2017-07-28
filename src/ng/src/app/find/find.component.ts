@@ -2,10 +2,11 @@ import { window } from 'rxjs/operator/window';
 import { Component, OnInit, Input } from '@angular/core';
 import { element } from 'protractor';
 import { FindService, Found } from './find.service';
+import { ws_send } from '../ws';
 
 export class Item {
   text: string;
-  link: string;
+  command: any;
 }
 
 class Model {
@@ -48,7 +49,8 @@ export class FindComponent implements OnInit {
     //  dirty trick
   }
 
-  onModifText2Find(event: any) {
-    this.fs.find(this.text2find);
+  onClick(command: any) {
+    console.log(command);
+    ws_send(command);
   }
 }

@@ -1,5 +1,5 @@
 [package]
-name = "server_rust"
+name = "dwd"
 version = "0.1.0"
 authors = ["maiquel <jleahred@gmail.com>"]
 

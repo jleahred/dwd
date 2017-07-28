@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 
-import { ws_onmessage, ws_send } from '../ws';
+import { ws_send, ws_subscribe_type } from '../ws';
 import { Item } from './find.component';
 
 
@@ -22,8 +22,10 @@ export class FindService {
   onClear = this._onClear.asObservable();
 
   constructor(private ngZone: NgZone) {
-    ws_onmessage.subscribe(msg => {
-      this.ngZone.run(() => this._onEntrance.next(msg));
+    ws_subscribe_type('Found').subscribe(msg => {
+      if (msg.type === 'Found') {
+        this.ngZone.run(() => this._onEntrance.next(msg));
+      }
     });
   }
 

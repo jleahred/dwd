@@ -1,7 +1,8 @@
 // check unwrap
 // check _
 // check let _ =
-//
+// log ng
+// reconnect websocket ng
 
 
 extern crate iron;
@@ -23,6 +24,7 @@ use ws::listen;
 
 mod wss;
 mod find;
+mod send_file_cont;
 
 
 

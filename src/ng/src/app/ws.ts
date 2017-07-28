@@ -1,3 +1,6 @@
+import * as stream from 'stream';
+import { observable } from 'rxjs/symbol/observable';
+import { Observable } from 'rxjs/Rx';
 import { parse, } from 'ts-node';
 import { Subject } from 'rxjs/Subject';
 import { cfgtesting } from '../config';
@@ -5,9 +8,7 @@ import { cfgtesting } from '../config';
 
 let ws: WebSocket;
 
-const _onMessage = new Subject<any>();
-export const ws_onmessage = _onMessage.asObservable();
-
+let _onMessage2: { [type: string]: Subject<any> } = {};
 
 
 if (cfgtesting() === false) {
@@ -18,60 +19,26 @@ if (cfgtesting() === false) {
   };
   ws.onmessage = (msg: MessageEvent) => {
     console.log(msg.data);
-    // console.log(msg.data);
-    _onMessage.next(JSON.parse(msg.data));
-    // _onMessage.next(
-    //   {
-    //     key0: msg.data,
-    //     key1: 'html',
-    //     val: ['aaa', 'bbbb']
-    //   },
-    // );
+    let rec = JSON.parse(msg.data);
+    if (_onMessage2[rec.type] !== undefined) {
+      _onMessage2[rec.type].next(rec);
+    } else {
+      console.log('received message with no subscription' + JSON.stringify(rec));
+    }
   };
 }
 
-
+export function ws_subscribe_type(type: string): Observable<any> {
+  if (_onMessage2[type] === undefined) {
+    _onMessage2[type] = new Subject<any>();
+  }
+  return _onMessage2[type].asObservable();
+}
 
 
 
 
 export function ws_send(data: any) {
-  if (cfgtesting()) {
-    ws_send_testing(data);
-  } else {
-    ws.send(JSON.stringify(data))
-  }
+  ws.send(JSON.stringify(data))
 }
 
-
-function ws_send_testing(msg: any) {
-  _onMessage.next(
-    {
-      key0: msg,
-      key1: msg,
-      val: ['aaa', 'bbbb']
-    },
-  );
-
-  _onMessage.next(
-    {
-      key0: 'doc',
-      key1: 'html',
-      val: ['aaa', 'bbbb']
-    },
-  );
-  _onMessage.next(
-    {
-      key0: 'doc',
-      key1: 'adoc',
-      val: ['cccc', 'dddd']
-    },
-  );
-  _onMessage.next(
-    {
-      key0: 'script',
-      key1: 'go',
-      val: ['eeee', 'ffff']
-    },
-  );
-}
