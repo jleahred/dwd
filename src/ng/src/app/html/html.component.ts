@@ -1,6 +1,6 @@
 import { NgZone } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { ws_subscribe_type } from '../ws';
+import { WsService } from '../ws.service';
 import { Status, AppService } from '../app.service';
 
 
@@ -20,12 +20,12 @@ export class HtmlComponent implements OnInit {
   public content: HtmlCont;
 
 
-  constructor(private ngZone: NgZone, private appserv: AppService) {
+  constructor(private ngZone: NgZone, private appserv: AppService, private ws: WsService) {
   }
 
 
   ngOnInit() {
-    ws_subscribe_type('Html').subscribe(msg => {
+    this.ws.subscribe_type('Html').subscribe(msg => {
       this.appserv.status = Status.Html;
       this.ngZone.run(() => {
         const html_content = msg as HtmlCont;

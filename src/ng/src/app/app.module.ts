@@ -9,6 +9,9 @@ import { FindService } from './find/find.service';
 import { KeysPipe } from './keys.pipe';
 import { MenuComponent } from './menu/menu.component';
 import { HtmlComponent } from './html/html.component';
+import { LogComponent } from './log/log.component';
+import { LogService } from './log/log.service';
+import { WsService } from './ws.service';
 
 @NgModule({
   declarations: [
@@ -16,13 +19,14 @@ import { HtmlComponent } from './html/html.component';
     FindComponent,
     KeysPipe,
     MenuComponent,
-    HtmlComponent
+    HtmlComponent,
+    LogComponent
   ],
   imports: [
     BrowserModule,
     FormsModule
   ],
-  providers: [AppService, FindService],
+  providers: [AppService, LogService, WsService, FindService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -2,7 +2,8 @@ import { window } from 'rxjs/operator/window';
 import { Component, OnInit, Input } from '@angular/core';
 import { element } from 'protractor';
 import { FindService, Found } from './find.service';
-import { ws_send } from '../ws';
+import { WsService } from '../ws.service';
+import { LogService } from '../log/log.service';
 
 export class Item {
   text: string;
@@ -25,7 +26,7 @@ export class FindComponent implements OnInit {
 
   text2find: string;
 
-  constructor(private fs: FindService) {
+  constructor(private ls: LogService, private wss: WsService, private fs: FindService) {
   }
 
   ngOnInit() {
@@ -50,9 +51,10 @@ export class FindComponent implements OnInit {
   }
 
   onClick(command: any) {
-    console.log(command);
+    this.ls.log(command as string);
+    // console.log(command);
     this.model.founds = {};
 
-    ws_send(command);
+    this.wss.send(command);
   }
 }
