@@ -18,7 +18,7 @@ export class WsService {
       // console.log('Socket has been opened!');
     };
     this.ws.onmessage = (msg: MessageEvent) => {
-      console.log(msg.data);
+      // console.log(msg.data);
       const rec = JSON.parse(msg.data);
       if (this._onMessage2[rec.type] !== undefined) {
         this._onMessage2[rec.type].next(rec);

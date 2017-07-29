@@ -1,10 +1,12 @@
 .navbar#bottom {
   height: 10%;
+  min-height: 40px;
 }
 
 #log {
   width: 100vw;
   height: 10vh;
+  min-height: 40px;
   resize: none;
   /* background-color: yellow; */
   font-family: monospace;

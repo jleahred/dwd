@@ -15,13 +15,23 @@ export class LogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.ls.on_log = (line: string) => this.on_log(line);
-    this.wss.subscribe_type('Log').subscribe(msg => {
-      this.on_log((new Date()).toLocaleTimeString() + ' REMOTE ' + msg);
+    this.ls.on_log = (data: any) => this.on_log(data);
+    this.wss.subscribe_type('Log').subscribe(data => {
+      this.on_log(data, true);
     });
   }
 
-  on_log(line: string) {
+  on_log(data: any, remote = false) {
+    const now = new Date();
+    let line = now.toLocaleTimeString() + '. ';
+    if (remote) {
+      line += ' REMOTE> ';
+    }
+    if (typeof data === 'object') {
+      line += JSON.stringify(data);
+    } else {
+      line += data.toString();
+    }
     this.content = line + '\n' + this.content;
   }
 
