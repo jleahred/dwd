@@ -8,7 +8,6 @@ import { FindComponent } from './find/find.component';
 import { FindService } from './find/find.service';
 import { KeysPipe } from './keys.pipe';
 import { MenuComponent } from './menu/menu.component';
-import { HtmlComponent } from './html/html.component';
 import { LogComponent } from './log/log.component';
 import { LogService } from './log/log.service';
 import { WsService } from './ws.service';
@@ -19,7 +18,6 @@ import { WsService } from './ws.service';
     FindComponent,
     KeysPipe,
     MenuComponent,
-    HtmlComponent,
     LogComponent
   ],
   imports: [
