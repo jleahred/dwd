@@ -2,7 +2,7 @@
 pub static fake: [u8; 1] = [38, ];
 
 
-pub fn get(name: &str) -> Result<&[u8], &str> {
+pub fn get(name: &str) -> Result<&'static [u8], &'static str> {
   match name {
     "http_static/index.html" => Result::Ok(&fake),
     "http_static/3rdpartylicenses.txt" => Result::Ok(&fake),

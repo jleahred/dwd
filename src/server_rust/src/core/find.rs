@@ -62,7 +62,7 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender, status: &mut FindStatus) -> Resu
                 continue;
             }
             if path.is_dir() {
-                println!("{:?}", file_name_path);
+                // println!("{:?}", file_name_path);
                 exec_find(&path, ws_out, status)?;
             } else {
                 let ext = path.extension()
