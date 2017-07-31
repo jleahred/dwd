@@ -1,8 +1,7 @@
 extern crate serde_json;
 
-use std::io;
 use std::path::Path;
-use std::thread;
+use std::{thread, time};
 use std::fs;
 
 use super::proto;
@@ -26,19 +25,34 @@ pub struct Item {
 
 
 
+struct FindStatus {
+    max_items: i32,
+}
+const MAX_ITEMS: i32 = 100;
+
+
 pub fn process_find(_: &str, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
     let ws_out_copy = ws_out.clone();
-    thread::spawn(move || exec_find(Path::new("."), &ws_out_copy));
-
+    thread::spawn(move || {
+        match exec_find(Path::new("."),
+                        &ws_out_copy,
+                        &mut FindStatus { max_items: MAX_ITEMS }) {
+            Ok(_) => (),
+            Err(e) => {
+                let _ = super::wss::send_log(&format!("{:?}", e), &ws_out_copy);
+            }
+        };
+    });
     Ok(())
 }
 
 
-fn exec_find(dir: &Path, ws_out: &::ws::Sender) -> io::Result<()> {
+fn exec_find(dir: &Path, ws_out: &::ws::Sender, status: &mut FindStatus) -> Result<(), String> {
     use std::ffi::OsStr;
     if dir.is_dir() {
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
+        thread::sleep(time::Duration::from_millis(5));
+        for entry in fs::read_dir(dir).map_err(|e| e.to_string())? {
+            let entry = entry.map_err(|e| e.to_string())?;
             let path = entry.path();
             let file_name_path = OsStr::to_str(path.as_os_str()).unwrap_or("???");
             // let file_name = path.file_name()
@@ -49,32 +63,45 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender) -> io::Result<()> {
             }
             if path.is_dir() {
                 println!("{:?}", file_name_path);
-                match exec_find(&path, ws_out) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        let _ = super::wss::send_log(&format!("{:?}", e), ws_out);
-                    }
-                }
+                exec_find(&path, ws_out, status)?;
             } else {
                 let ext = path.extension()
                     .and_then(OsStr::to_str)
                     .unwrap_or("");
-                match ext {
+                let data = match ext {
                     "html" => {
-                        let data = proto::MsgOut::Found(Found {
+                        Some(proto::MsgOut::Found(Found {
                             key0: "DOC".to_owned(),
                             key1: ext.to_owned(),
                             item: Item {
                                 text: file_name_path.to_owned(),
                                 command: proto::MsgIn::Html { file: file_name_path.to_owned() },
                             },
-                        });
-                        let _ = super::wss::send_data(data, ws_out);
+                        }))
                     }
-                    _ => (),
+                    _ => None,
                 };
+                send_item(data, ws_out, status)?;
             }
         }
     }
     Ok(())
+}
+
+
+fn send_item(data: Option<proto::MsgOut>,
+             ws_out: &::ws::Sender,
+             status: &mut FindStatus)
+             -> Result<(), String> {
+    if status.max_items == 0 {
+        return Err("too many items".to_owned());
+    }
+
+    match data {
+        Some(data) => {
+            status.max_items -= 1;
+            super::wss::send_data(data, ws_out).map_err(|e| e.to_string())
+        }
+        None => Ok(()),
+    }
 }

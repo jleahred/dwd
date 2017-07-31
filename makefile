@@ -1,5 +1,5 @@
 .PHONY: all
-all: ng #embed #rust cargo_install
+all: ng embed #rust cargo_install
 
 
 .PHONY: ng
@@ -10,3 +10,7 @@ ng:
 .PHONY: embed
 embed:
 	cd src/server_rust; rust-embed http_static src/core/http_static.rs
+
+.PHONY: install
+install:
+	cargo uninstall dwd || true; cd src/server_rust; cargo build --release; cargo install

@@ -8,12 +8,8 @@
 // #[serde(untagged)]
 #[serde(tag = "type")]
 pub enum MsgIn {
-    Find {
-        text2find: String,
-    },
-    Html {
-        file: String,
-    },
+    Find { text2find: String },
+    Html { file: String },
 }
 
 
@@ -24,13 +20,9 @@ pub enum MsgIn {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum MsgOut {
-    Log {
-        log_line: String,
-    },
+    Log { log_line: String },
     Found(super::find::Found),
-    Html {
-        data: String,
-    },
+    Html { data: String },
 }
 
 
