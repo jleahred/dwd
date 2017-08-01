@@ -1,4 +1,5 @@
 pub mod wss;
+pub mod file_cont;
 
 #[cfg(debug_assertions)]
 pub mod http_static_fake;

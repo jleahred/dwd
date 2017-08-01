@@ -1,5 +1,5 @@
 .PHONY: all
-all: ng embed #rust cargo_install
+all: ng embed install
 
 
 .PHONY: ng
