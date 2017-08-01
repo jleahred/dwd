@@ -64,6 +64,6 @@ fn get_http_response(req: &mut Request) -> Result<iron::Response, iron::IronErro
         file_name = "index.html".to_owned()
     }
 
-    let content = core::file_cont::get(&file_name);
-    Ok(Response::with((Header(core::file_cont::ctype(&file_name)), status::Ok, content)))
+    let content = core::file_content::get(&file_name);
+    Ok(Response::with((Header(core::file_content::ctype(&file_name)), status::Ok, content)))
 }

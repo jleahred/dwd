@@ -1,20 +1,15 @@
 extern crate iron;
 
 
-pub fn get(file_name: &str) -> &[u8] {
-    #[cfg(debug_assertions)]
-    use core::http_static_fake as http_static;
-    #[cfg(not(debug_assertions))]
-    use core::http_static;
-
+pub fn get(file_name: &str) -> &'static [u8] {
     let fname = match file_name == "" {
-        true => "http_static/index.html".to_owned(),
-        false => format!("http_static/{}", file_name),
+        true => "index.html".to_owned(),
+        false => file_name.to_owned(),
     };
 
-    match http_static::get(&fname) {
-        Ok(content) => content,
-        Err(_) => &[] as &[u8],
+    match super::http_static2::get(&fname) {
+        Some(content) => content,
+        None => &[] as &'static [u8],
     }
 }
 
