@@ -9,7 +9,7 @@ ng:
 
 .PHONY: embed
 embed:
-	cd src/server_rust; rust-embed http_static src/core/http_static.rs
+	cd src/server_rust; embed_dir http_static src/core/http_static2.rs
 
 .PHONY: install
 install:
