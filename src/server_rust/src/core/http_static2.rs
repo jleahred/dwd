@@ -15,7 +15,7 @@ macro_rules! gen_get_includes_bytes{
 }
 
 
-gen_get_includes_bytes!("../../../ng/dist/",
+gen_get_includes_bytes!("../../http_static/",
                         "index.html",
                         "vendor.85a84fa43ddcf3e9edcc.bundle.js",
                         "inline.3c2b0a01d63efc5f8551.bundle.js",

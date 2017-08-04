@@ -1,5 +1,10 @@
 import { Component } from '@angular/core';
-// import { AppService, Status } from './app.service';
+
+
+class OpenDocNewTab {
+  file: string;
+}
+
 
 @Component({
   selector: 'app-root',

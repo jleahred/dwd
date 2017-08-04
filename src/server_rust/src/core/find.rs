@@ -1,7 +1,7 @@
 extern crate serde_json;
 
 use std::path::Path;
-use std::{thread, time};
+use std::thread;
 use std::fs;
 
 use super::proto;
@@ -49,20 +49,19 @@ pub fn process_find(_: &str, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
 
 fn exec_find(dir: &Path, ws_out: &::ws::Sender, status: &mut FindStatus) -> Result<(), String> {
     use std::ffi::OsStr;
+    println!("{}", dir.display());
     if dir.is_dir() {
-        thread::sleep(time::Duration::from_millis(5));
+        if let Some(file_name) = dir.file_name().and_then(|f| f.to_str()) {
+            if file_name.starts_with(".") {
+                return Ok(());
+            }
+        }
+        // thread::sleep(time::Duration::from_millis(5));
         for entry in fs::read_dir(dir).map_err(|e| e.to_string())? {
             let entry = entry.map_err(|e| e.to_string())?;
             let path = entry.path();
             let file_name_path = OsStr::to_str(path.as_os_str()).unwrap_or("???");
-            // let file_name = path.file_name()
-            //     .and_then(OsStr::to_str)
-            //     .unwrap_or("???");
-            if file_name_path.starts_with(".") && file_name_path.starts_with("./") == false {
-                continue;
-            }
             if path.is_dir() {
-                // println!("{:?}", file_name_path);
                 exec_find(&path, ws_out, status)?;
             } else {
                 let ext = path.extension()
@@ -75,7 +74,7 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender, status: &mut FindStatus) -> Resu
                             key1: ext.to_owned(),
                             item: Item {
                                 text: file_name_path.to_owned(),
-                                command: proto::MsgIn::Html { file: file_name_path.to_owned() },
+                                command: proto::MsgIn::RqDoc { file: file_name_path.to_owned() },
                             },
                         }))
                     }
