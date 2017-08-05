@@ -15,7 +15,7 @@ export class WsService {
 
   constructor(private log: LogService) {
     this.connect();
-    this.timer = Observable.timer(2000, 2000);
+    this.timer = Observable.timer(2000, 5000);
     // subscribing to a observable returns a subscription object
     this.subtimer = this.timer.subscribe(_ => this.checkConnection());
   }
