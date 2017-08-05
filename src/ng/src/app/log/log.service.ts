@@ -8,7 +8,7 @@ export class LogService {
 
   public on_log: (this, line: string) => void;
 
-  log(data: any, remote = false) {
+  write(data: any, remote = false) {
     // const now = new Date();
     // const line = now.toLocaleTimeString() + '.  ';
     // const line = now.toISOString() + '  ';

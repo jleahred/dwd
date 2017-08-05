@@ -15,4 +15,4 @@ embed:
 
 .PHONY: install
 install:
-	cargo uninstall dwd || true; cd src/server_rust; cargo build --release; cargo install
+	cargo uninstall dwd || true; cd src/server_rust; cargo build --release #; cargo install

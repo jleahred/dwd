@@ -11,11 +11,11 @@ export class LogComponent implements OnInit {
 
   public content = '';
 
-  constructor(private ls: LogService, private wss: WsService) {
+  constructor(private log: LogService, private wss: WsService) {
   }
 
   ngOnInit() {
-    this.ls.on_log = (data: any) => this.on_log(data);
+    this.log.on_log = (data: any) => this.on_log(data);
     this.wss.subscribe_type('Log').subscribe(data => {
       this.on_log(data, true);
     });

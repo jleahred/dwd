@@ -5,13 +5,17 @@ import { FindService, Found } from './find.service';
 import { WsService } from '../ws.service';
 import { LogService } from '../log/log.service';
 
-export class Item {
-  text: string;
-  command: any;
-}
+class Link { Link: string; }
+class Command { Command: any; }
+
+
+export type Item = Link | Command;
+// enum Item {
+//   Link ; Command;
+// }
 
 class Model {
-  founds: { [key: string]: { [key: string]: [Item] } } = {};
+  founds: { [key: string]: { [key: string]: [Link | Command] } } = {};
 }
 
 
@@ -26,7 +30,7 @@ export class FindComponent implements OnInit {
 
   text2find: string;
 
-  constructor(private ls: LogService, private wss: WsService, private fs: FindService) {
+  constructor(private log: LogService, private wss: WsService, private fs: FindService) {
   }
 
   ngOnInit() {
@@ -50,11 +54,23 @@ export class FindComponent implements OnInit {
     //  dirty trick
   }
 
-  onClick(command: any) {
-    this.ls.log(command as string);
-    // console.log(command);
-    this.model.founds = {};
+  onClick(item: Item) {
+    this.log.write(JSON.stringify(item));
+    // location.href = this.getLinkItem(item);
+  }
 
-    this.wss.send(command);
+  getTextItem(item: Item): string {
+    const link = (item as Link).Link;
+    if (link !== undefined) {
+      return link;
+    }
+    return 'not supported to string Item' + JSON.stringify(item);
+  }
+  getLinkItem(item: Item): string | undefined {
+    const link = (item as Link).Link;
+    if (link !== undefined) {
+      return link;
+    }
+    return undefined;
   }
 }

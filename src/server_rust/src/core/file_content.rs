@@ -1,15 +1,31 @@
 extern crate iron;
 
 
-pub fn get(file_name: &str) -> &'static [u8] {
+pub fn get_static(file_name: &str) -> Option<&[u8]> {
     let fname = match file_name == "" {
         true => "index.html".to_owned(),
         false => file_name.to_owned(),
     };
 
-    match super::http_static2::get(&fname) {
-        Some(content) => content,
-        None => &[] as &'static [u8],
+    if let Some(content) = super::http_static2::get(&fname) {
+        Some(content)
+    } else {
+        None
+    }
+}
+
+pub fn get_content_from_disk(file_name: &str) -> Option<Vec<u8>> {
+    use std::fs::File;
+    use std::io::prelude::*;
+
+    let mut f = File::open(file_name).unwrap();
+    let mut buffer = Vec::new();
+
+    f.read_to_end(&mut buffer).unwrap();
+    if buffer.len() > 0 {
+        Some(buffer)
+    } else {
+        None
     }
 }
 
@@ -32,6 +48,5 @@ pub fn ctype(file_name: &str) -> iron::headers::ContentType {
         Some("txt") => ContentType(Mime(TopLevel::Text, SubLevel::Plain, vec![])),
         _ => ContentType(Mime(TopLevel::Text, SubLevel::Plain, vec![])),
     };
-    println!("{}", result);
     result
 }

@@ -11,9 +11,6 @@ pub enum MsgIn {
     Find {
         text2find: String,
     },
-    RqDoc {
-        file: String,
-    },
 }
 
 
@@ -28,9 +25,6 @@ pub enum MsgOut {
         log_line: String,
     },
     Found(super::find::Found),
-    OpenDocNewTab {
-        file: String,
-    },
 }
 
 
@@ -39,6 +33,5 @@ pub fn distribute_msg(msg: MsgIn, ws_out: &::ws::Sender) -> Result<(), ::ws::Err
 
     match msg {
         MsgIn::Find { text2find } => super::find::process_find(&text2find, ws_out),
-        MsgIn::RqDoc { file } => super::wss::send_data(MsgOut::OpenDocNewTab{file}, ws_out),
     }
 }

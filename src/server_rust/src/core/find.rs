@@ -18,11 +18,11 @@ pub struct Found {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Item {
-    pub text: String,
-    pub command: proto::MsgIn,
+// #[serde(tag = "type")]
+pub enum Item {
+    Command(String),
+    Link(String),
 }
-
 
 
 struct FindStatus {
@@ -49,7 +49,6 @@ pub fn process_find(_: &str, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
 
 fn exec_find(dir: &Path, ws_out: &::ws::Sender, status: &mut FindStatus) -> Result<(), String> {
     use std::ffi::OsStr;
-    println!("{}", dir.display());
     if dir.is_dir() {
         if let Some(file_name) = dir.file_name().and_then(|f| f.to_str()) {
             if file_name.starts_with(".") {
@@ -72,10 +71,7 @@ fn exec_find(dir: &Path, ws_out: &::ws::Sender, status: &mut FindStatus) -> Resu
                         Some(proto::MsgOut::Found(Found {
                             key0: "DOC".to_owned(),
                             key1: ext.to_owned(),
-                            item: Item {
-                                text: file_name_path.to_owned(),
-                                command: proto::MsgIn::RqDoc { file: file_name_path.to_owned() },
-                            },
+                            item: Item::Link(file_name_path.to_owned()),
                         }))
                     }
                     _ => None,
