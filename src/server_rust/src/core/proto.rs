@@ -32,6 +32,6 @@ pub fn distribute_msg(msg: MsgIn, ws_out: &::ws::Sender) -> Result<(), ::ws::Err
     println!("Received: {:?}", msg);
 
     match msg {
-        MsgIn::Find { text2find } => super::find::process_find(&text2find, ws_out),
+        MsgIn::Find { text2find } => super::find::run(text2find, ws_out),
     }
 }

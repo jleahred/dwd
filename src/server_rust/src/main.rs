@@ -1,6 +1,6 @@
 // find by filename
 // load pdf
-// find inside document
+// find by content
 // stop find when a new request arrives
 // test memory and cpu
 
