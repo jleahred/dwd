@@ -30,9 +30,9 @@ struct FindMutStatus {
 }
 const MAX_ITEMS: i32 = 100;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 struct FindStatus {
-    found_dir_name: bool,
+    // found_dir_name: bool, 
 }
 
 
@@ -81,7 +81,6 @@ fn exec_find(dir: &Path,
     }
 
     let dir_name = get_dir_name(dir)?;
-    println!("{:?}", dir_name != ".");
     match dir_name.starts_with(".") && dir_name != "." {
         true => return Ok(()),
         false => (),
@@ -90,39 +89,52 @@ fn exec_find(dir: &Path,
     // thread::sleep(time::Duration::from_millis(5));
     for entry in fs::read_dir(dir).map_err(|e| e.to_string())? {
         let entry_path = entry.map_err(|e| e.to_string())?.path();
-        let file_name_path = OsStr::to_str(entry_path.as_os_str())
-            .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
         if entry_path.is_dir() {
-            let new_status = get_new_status(&dir_name, status, find_rules);
-            exec_find(&entry_path, find_rules, ws_out, new_status, mut_status)?;
+            // let new_status = get_new_status_by_dir_name(&dir_name, status, find_rules);
+            exec_find(&entry_path, find_rules, ws_out, status, mut_status)?;
         } else {
-            let ext = entry_path.extension()
-                .and_then(OsStr::to_str);
-            let data = match ext {
-                Some("html") => {
-                    Some(proto::MsgOut::Found(Found {
-                        key0: "DOC".to_owned(),
-                        key1: "html".to_owned(),
-                        item: Item::Link(file_name_path.to_owned()),
-                    }))
-                }
-                _ => None,
-            };
-            send_item(data, ws_out, mut_status)?;
+            let file_name_path = OsStr::to_str(entry_path.as_os_str())
+                    .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
+            let file_name = entry_path.file_name()
+                .and_then(OsStr::to_str)
+                .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
+            if file_name.starts_with(".") {
+                continue;
+            }
+
+            if match_dirfile_name(file_name_path, find_rules) {
+                let ext = entry_path.extension()
+                    .and_then(OsStr::to_str);
+
+
+                let data = match ext {
+                    Some("html") => {
+                        Some(proto::MsgOut::Found(Found {
+                            key0: "DOC".to_owned(),
+                            key1: "html".to_owned(),
+                            item: Item::Link(file_name_path.to_owned()),
+                        }))
+                    }
+                    Some(ext) => {
+                        Some(proto::MsgOut::Found(Found {
+                            key0: "UNKNOWN".to_owned(),
+                            key1: ext.to_owned(),
+                            item: Item::Link(file_name_path.to_owned()),
+                        }))
+                    }
+                    _ => None,
+                };
+
+
+                send_item(data, ws_out, mut_status)?;
+            }
         }
     }
     Ok(())
 }
 
-fn get_new_status(dir_name: &str, status: FindStatus, find_rules: &FindRules) -> FindStatus {
-    if match_dirname(&dir_name, find_rules) {
-        FindStatus { found_dir_name: true, ..Default::default() }
-    } else {
-        status
-    }
-}
 
-fn match_dirname(dir_name: &str, find_rules: &FindRules) -> bool {
+fn match_dirfile_name(dir_name: &str, find_rules: &FindRules) -> bool {
     for andr in find_rules.and.iter() {
         if dir_name.contains(andr) == false {
             return false;
@@ -138,81 +150,81 @@ fn match_dirname(dir_name: &str, find_rules: &FindRules) -> bool {
 
 
 #[test]
-fn test_match_dirname_and() {
-    assert!(match_dirname("abcdefg",
-                          &FindRules {
-                              and: vec!["ab".to_owned()],
-                              not: vec![],
-                          }));
+fn test_match_dirfile_name_and() {
+    assert!(match_dirfile_name("abcdefg",
+                               &FindRules {
+                                   and: vec!["ab".to_owned()],
+                                   not: vec![],
+                               }));
 
-    assert!(match_dirname("abcdefg",
-                          &FindRules {
-                              and: vec!["ab".to_owned(), "def".to_owned()],
-                              not: vec![],
-                          }));
+    assert!(match_dirfile_name("abcdefg",
+                               &FindRules {
+                                   and: vec!["ab".to_owned(), "def".to_owned()],
+                                   not: vec![],
+                               }));
 
-    assert!(match_dirname("abcdefg",
-                          &FindRules {
-                              and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
-                              not: vec![],
-                          }));
+    assert!(match_dirfile_name("abcdefg",
+                               &FindRules {
+                                   and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
+                                   not: vec![],
+                               }));
 
-    assert!(!match_dirname("abcdefg",
-                           &FindRules {
-                               and: vec!["abg".to_owned()],
-                               not: vec![],
-                           }));
+    assert!(!match_dirfile_name("abcdefg",
+                                &FindRules {
+                                    and: vec!["abg".to_owned()],
+                                    not: vec![],
+                                }));
 
-    assert!(!match_dirname("abcdefg",
-                           &FindRules {
-                               and: vec!["ab".to_owned(), "z".to_owned()],
-                               not: vec![],
-                           }));
+    assert!(!match_dirfile_name("abcdefg",
+                                &FindRules {
+                                    and: vec!["ab".to_owned(), "z".to_owned()],
+                                    not: vec![],
+                                }));
 
-    assert!(!match_dirname("abcdefg",
-                           &FindRules {
-                               and: vec!["ab".to_owned(), "g".to_owned(), "bd".to_owned()],
-                               not: vec![],
-                           }));
+    assert!(!match_dirfile_name("abcdefg",
+                                &FindRules {
+                                    and: vec!["ab".to_owned(), "g".to_owned(), "bd".to_owned()],
+                                    not: vec![],
+                                }));
 }
 
 #[test]
-fn test_match_dirname_not() {
-    assert!(match_dirname("abcdefg",
-                          &FindRules {
-                              and: vec!["ab".to_owned()],
-                              not: vec!["zz".to_owned()],
-                          }));
+fn test_match_dirfile_name_not() {
+    assert!(match_dirfile_name("abcdefg",
+                               &FindRules {
+                                   and: vec!["ab".to_owned()],
+                                   not: vec!["zz".to_owned()],
+                               }));
 
-    assert!(match_dirname("abcdefg",
-                          &FindRules {
-                              and: vec!["ab".to_owned(), "def".to_owned()],
-                              not: vec!["abd".to_owned()],
-                          }));
+    assert!(match_dirfile_name("abcdefg",
+                               &FindRules {
+                                   and: vec!["ab".to_owned(), "def".to_owned()],
+                                   not: vec!["abd".to_owned()],
+                               }));
 
-    assert!(match_dirname("abcdefg",
-                          &FindRules {
-                              and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
-                              not: vec!["fag".to_owned(), "ed".to_owned()],
-                          }));
+    assert!(match_dirfile_name("abcdefg",
+                               &FindRules {
+                                   and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
+                                   not: vec!["fag".to_owned(), "ed".to_owned()],
+                               }));
 
-    assert!(!match_dirname("abcdefg",
-                           &FindRules {
-                               and: vec!["a".to_owned()],
-                               not: vec!["ab".to_owned()],
-                           }));
+    assert!(!match_dirfile_name("abcdefg",
+                                &FindRules {
+                                    and: vec!["a".to_owned()],
+                                    not: vec!["ab".to_owned()],
+                                }));
 
-    assert!(!match_dirname("abcdefg",
-                           &FindRules {
-                               and: vec!["ab".to_owned(), "def".to_owned()],
-                               not: vec!["g".to_owned()],
-                           }));
+    assert!(!match_dirfile_name("abcdefg",
+                                &FindRules {
+                                    and: vec!["ab".to_owned(), "def".to_owned()],
+                                    not: vec!["g".to_owned()],
+                                }));
 
-    assert!(!match_dirname("abcdefg",
-                           &FindRules {
-                               and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
-                               not: vec!["z".to_owned(), "de".to_owned()],
-                           }));
+    assert!(!match_dirfile_name("abcdefg",
+                                &FindRules {
+                                    and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
+                                    not: vec!["z".to_owned(), "de".to_owned()],
+                                }));
 }
 
 
@@ -242,11 +254,11 @@ fn get_find_rules(s: &str) -> FindRules {
 
     let tokens = split_string_and_spaces(s);
     for token in tokens {
-        match token.starts_with("-") {
-                true => &mut find_rules.not,
-                false => &mut find_rules.and,
-            }
-            .push(token);
+        let (and_not, tk) = match token.starts_with("-") {
+            true => (&mut find_rules.not, token.chars().skip(1).collect::<String>()),
+            false => (&mut find_rules.and, token),
+        };
+        and_not.push(tk);
     }
 
     find_rules
@@ -257,7 +269,7 @@ fn test_get_find_rules() {
     let result = get_find_rules("aaa \"-bbb cc\" d \"-  ee ff\"  \" gg g g  \"");
     let expected = FindRules {
         and: vec!["aaa".to_owned(), "d".to_owned(), " gg g g  ".to_owned()],
-        not: vec!["-bbb cc".to_owned(), "-  ee ff".to_owned()],
+        not: vec!["bbb cc".to_owned(), "  ee ff".to_owned()],
     };
     assert_eq!(result.and, expected.and);
     assert_eq!(result.not, expected.not);
