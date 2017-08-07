@@ -94,7 +94,7 @@ fn exec_find(dir: &Path,
             exec_find(&entry_path, find_rules, ws_out, status, mut_status)?;
         } else {
             let file_name_path = OsStr::to_str(entry_path.as_os_str())
-                    .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
+                .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
             let file_name = entry_path.file_name()
                 .and_then(OsStr::to_str)
                 .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
@@ -110,15 +110,22 @@ fn exec_find(dir: &Path,
                 let data = match ext {
                     Some("html") => {
                         Some(proto::MsgOut::Found(Found {
-                            key0: "DOC".to_owned(),
+                            key0: "LINK".to_owned(),
                             key1: "html".to_owned(),
                             item: Item::Link(file_name_path.to_owned()),
                         }))
                     }
-                    Some(ext) => {
+                    Some("pdf") => {
                         Some(proto::MsgOut::Found(Found {
-                            key0: "UNKNOWN".to_owned(),
-                            key1: ext.to_owned(),
+                            key0: "LINK".to_owned(),
+                            key1: "pdf".to_owned(),
+                            item: Item::Link(file_name_path.to_owned()),
+                        }))
+                    }
+                    Some("adoc") => {
+                        Some(proto::MsgOut::Found(Found {
+                            key0: "TEXT".to_owned(),
+                            key1: "adoc".to_owned(),
                             item: Item::Link(file_name_path.to_owned()),
                         }))
                     }

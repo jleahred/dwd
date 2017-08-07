@@ -8,9 +8,7 @@ use std::fmt;
 
 pub fn run(http_socket: &str) {
     println!("http server running on {}", http_socket);
-    Iron::new(|req: &mut Request| get_response(req))
-        .http(http_socket)
-        .unwrap();
+    let _ = Iron::new(|req: &mut Request| get_response(req)).http(http_socket);
 }
 
 
@@ -44,7 +42,7 @@ pub fn get_response(req: &mut Request) -> Result<iron::Response, iron::IronError
     let header = Header(super::file_content::ctype(&file_name));
     if let Some(content) = super::file_content::get_static(&file_name) {
         Ok(Response::with((header, iron::status::Ok, content)))
-    } else if let Some(content) = super::file_content::get_content_from_disk(&file_name) {
+    } else if let Ok(content) = super::file_content::get_content_from_disk(&file_name) {
         Ok(Response::with((header, iron::status::Ok, &content as &[u8])))
     } else {
         Err(IronError::new(NoFile, iron::status::NotFound))

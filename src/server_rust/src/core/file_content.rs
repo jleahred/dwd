@@ -14,19 +14,15 @@ pub fn get_static(file_name: &str) -> Option<&[u8]> {
     }
 }
 
-pub fn get_content_from_disk(file_name: &str) -> Option<Vec<u8>> {
+pub fn get_content_from_disk(file_name: &str) -> Result<Vec<u8>, String> {
     use std::fs::File;
     use std::io::prelude::*;
 
-    let mut f = File::open(file_name).unwrap();
+    let mut f = File::open(file_name).map_err(|e| e.to_string())?;
     let mut buffer = Vec::new();
 
-    f.read_to_end(&mut buffer).unwrap();
-    if buffer.len() > 0 {
-        Some(buffer)
-    } else {
-        None
-    }
+    f.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
+    Ok(buffer)
 }
 
 pub fn ctype(file_name: &str) -> iron::headers::ContentType {
@@ -41,6 +37,11 @@ pub fn ctype(file_name: &str) -> iron::headers::ContentType {
         Some("js") => ContentType(Mime(TopLevel::Application, SubLevel::Javascript, vec![])),
         Some("css") => ContentType(Mime(TopLevel::Text, SubLevel::Css, vec![])),
         Some("png") => ContentType(Mime(TopLevel::Image, SubLevel::Png, vec![])),
+        Some("pdf") => {
+            ContentType(Mime(TopLevel::Application,
+                             SubLevel::Ext("pdf".to_owned()),
+                             vec![]))
+        }
         Some("ico") => {
             ContentType(Mime(TopLevel::Image, SubLevel::Ext("x-ico".to_owned()), vec![]))
         }

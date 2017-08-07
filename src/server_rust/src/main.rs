@@ -1,12 +1,16 @@
-// find by filename
-// load pdf
+// dynamic websocket port on ng
+// refactor find function
+// fault tolerance
+// remove uneeded iron dependencies (static_file and mount)
+//      after removing, I have some crashes
+// reduce number of iron threads
+// tags system
 // find by content
 // stop find when a new request arrives
 // test memory and cpu
 
 
 // thread pool
-// check unwrap
 // check _
 // check let _ =
 

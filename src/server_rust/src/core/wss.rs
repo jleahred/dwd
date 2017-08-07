@@ -60,13 +60,12 @@ impl Handler for Server {
 pub fn run(ws_socket: &str) {
     println!("WS server running on {}", ws_socket);
     let count = std::rc::Rc::new(std::cell::Cell::new(0));
-    listen(ws_socket, |out| {
-            Server {
-                out: out,
-                count: count.clone(),
-            }
-        })
-        .unwrap()
+    let _ = listen(ws_socket, |out| {
+        Server {
+            out: out,
+            count: count.clone(),
+        }
+    });
 }
 
 
