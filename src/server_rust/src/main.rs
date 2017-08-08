@@ -1,4 +1,4 @@
-// dynamic websocket port on ng
+// scripts: rust, go...
 // refactor find function
 // fault tolerance
 // remove uneeded iron dependencies (static_file and mount)

@@ -11,6 +11,7 @@ import { MenuComponent } from './menu/menu.component';
 import { LogComponent } from './log/log.component';
 import { LogService } from './log/log.service';
 import { WsService } from './ws.service';
+import { ParamsComponent } from './params/params.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { WsService } from './ws.service';
     FindComponent,
     KeysPipe,
     MenuComponent,
-    LogComponent
+    LogComponent,
+    ParamsComponent
   ],
   imports: [
     BrowserModule,

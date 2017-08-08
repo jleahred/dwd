@@ -21,9 +21,15 @@ export class WsService {
   }
 
   connect() {
-    this.ws = new WebSocket('ws://' + location.hostname + ':8081/');
+    let port = String(8081);
+    if (location.port !== String(4200)) {   //  4200 -> developing
+      port = String(Number(location.port) + 1);
+    }
+    const socket_url = 'ws://' + location.hostname + ':' + port;
+    this.log.write('Connecting ws on  ' + socket_url);
+    this.ws = new WebSocket(socket_url);
     this.ws.onopen = (event: Event) => {
-      this.log.write('Socket has been opened!');
+      this.log.write('Socket has been opened! on  ' + socket_url);
     };
     this.ws.onmessage = (msg: MessageEvent) => {
       const rec = JSON.parse(msg.data);
