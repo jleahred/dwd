@@ -23,6 +23,7 @@ extern crate serde_derive;
 
 use std::thread;
 mod core;
+mod plugin;
 
 
 fn main() {
