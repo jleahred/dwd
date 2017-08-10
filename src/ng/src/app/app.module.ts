@@ -12,6 +12,7 @@ import { LogComponent } from './log/log.component';
 import { LogService } from './log/log.service';
 import { WsService } from './ws.service';
 import { ParamsComponent } from './params/params.component';
+import { RecContentComponent } from './rec-content/rec-content.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { ParamsComponent } from './params/params.component';
     KeysPipe,
     MenuComponent,
     LogComponent,
-    ParamsComponent
+    ParamsComponent,
+    RecContentComponent
   ],
   imports: [
     BrowserModule,

@@ -103,3 +103,7 @@ fn msg_log(info: &str) -> proto::MsgOut {
 pub fn send_log(log_line: &str, ws_out: &::ws::Sender) -> Result<()> {
     send_data(msg_log(log_line), ws_out)
 }
+
+pub fn send_text(txt: &str, ws_out: &::ws::Sender) -> Result<()> {
+    send_data(super::proto::MsgOut::SimpleTxt{ text: txt.to_owned()}, ws_out)
+}

@@ -11,7 +11,7 @@ struct ScriptInfo {
 
 #[derive(Serialize, Deserialize, Debug)]
 enum Param {
-    String(String),
+    Text(String),
     Number(i32),
     Date {
         year: i32,
@@ -20,10 +20,9 @@ enum Param {
     },
 }
 
-use std;
-pub fn get_file_example() -> std::result::Result<String, String> {
-    serde_json::to_string(&ScriptInfo {
+pub fn get_file_example() -> String {
+    serde_json::to_string_pretty(&ScriptInfo {
         command: "cargo run $PARAM1 $PARAM2".to_owned(),
-        params: vec![Param::String("param_string".to_owned())],
-    }).map_err(|e| e.to_string())
+        params: vec![Param::Text("param_string".to_owned())],
+    }).unwrap_or("error generating plugin file example".to_owned())
 }

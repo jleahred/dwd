@@ -15,7 +15,7 @@ export class WsService {
 
   constructor(private log: LogService) {
     this.connect();
-    this.timer = Observable.timer(2000, 5000);
+    this.timer = Observable.timer(2000, 8000);
     // subscribing to a observable returns a subscription object
     this.subtimer = this.timer.subscribe(_ => this.checkConnection());
   }
@@ -32,6 +32,7 @@ export class WsService {
       this.log.write('Socket has been opened! on  ' + socket_url);
     };
     this.ws.onmessage = (msg: MessageEvent) => {
+      // console.log(msg);
       const rec = JSON.parse(msg.data);
       if (this._onMessage2[rec.type] !== undefined) {
         this._onMessage2[rec.type].next(rec);
