@@ -32,7 +32,7 @@ const MAX_ITEMS: i32 = 100;
 
 #[derive(Debug, Default, Clone, Copy)]
 struct FindStatus {
-    // found_dir_name: bool, 
+    // found_dir_name: bool,
 }
 
 
@@ -46,11 +46,15 @@ struct FindRules {
 pub fn run(str_rules: String, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> {
     let ws_out_copy = ws_out.clone();
     thread::spawn(move || {
-        match exec_find(Path::new("."),
-                        &get_find_rules(&str_rules),
-                        &ws_out_copy,
-                        Default::default(),
-                        &mut FindMutStatus { max_items: MAX_ITEMS }) {
+        match exec_find(
+            Path::new("."),
+            &get_find_rules(&str_rules),
+            &ws_out_copy,
+            Default::default(),
+            &mut FindMutStatus {
+                max_items: MAX_ITEMS,
+            },
+        ) {
             Ok(_) => (),
             Err(e) => {
                 let _ = super::wss::send_log(&format!("{:?}", e), &ws_out_copy);
@@ -61,12 +65,13 @@ pub fn run(str_rules: String, ws_out: &::ws::Sender) -> Result<(), ::ws::Error> 
 }
 
 
-fn exec_find(dir: &Path,
-             find_rules: &FindRules,
-             ws_out: &::ws::Sender,
-             status: FindStatus,
-             mut_status: &mut FindMutStatus)
-             -> Result<(), String> {
+fn exec_find(
+    dir: &Path,
+    find_rules: &FindRules,
+    ws_out: &::ws::Sender,
+    status: FindStatus,
+    mut_status: &mut FindMutStatus,
+) -> Result<(), String> {
     use std::ffi::OsStr;
 
     fn get_dir_name(dir: &Path) -> Result<String, String> {
@@ -74,9 +79,7 @@ fn exec_find(dir: &Path,
             return Err(format!("Expected dir, not file {}", dir.display()));
         }
 
-        let dir_name = dir.file_name()
-            .and_then(|f| f.to_str())
-            .unwrap_or(".");
+        let dir_name = dir.file_name().and_then(|f| f.to_str()).unwrap_or(".");
         Ok(dir_name.to_owned())
     }
 
@@ -93,52 +96,72 @@ fn exec_find(dir: &Path,
             // let new_status = get_new_status_by_dir_name(&dir_name, status, find_rules);
             exec_find(&entry_path, find_rules, ws_out, status, mut_status)?;
         } else {
-            let file_name_path = OsStr::to_str(entry_path.as_os_str())
-                .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
-            let file_name = entry_path.file_name()
+            let file_name_path = OsStr::to_str(entry_path.as_os_str()).ok_or(format!(
+                "Error getting string from path {}",
+                entry_path.display()
+            ))?;
+            let file_name = entry_path
+                .file_name()
                 .and_then(OsStr::to_str)
-                .ok_or(format!("Error getting string from path {}", entry_path.display()))?;
+                .ok_or(format!(
+                    "Error getting string from path {}",
+                    entry_path.display()
+                ))?;
             if file_name.starts_with(".") {
                 continue;
             }
+            let ext = entry_path.extension().and_then(OsStr::to_str);
 
-            if match_dirfile_name(file_name_path, find_rules) {
-                let ext = entry_path.extension()
-                    .and_then(OsStr::to_str);
-
-
-                let data = match ext {
-                    Some("html") => {
-                        Some(proto::MsgOut::Found(Found {
-                            key0: "LINK".to_owned(),
-                            key1: "html".to_owned(),
-                            item: Item::Link(file_name_path.to_owned()),
-                        }))
-                    }
-                    Some("pdf") => {
-                        Some(proto::MsgOut::Found(Found {
-                            key0: "LINK".to_owned(),
-                            key1: "pdf".to_owned(),
-                            item: Item::Link(file_name_path.to_owned()),
-                        }))
-                    }
-                    Some("adoc") => {
-                        Some(proto::MsgOut::Found(Found {
-                            key0: "TEXT".to_owned(),
-                            key1: "adoc".to_owned(),
-                            item: Item::Link(file_name_path.to_owned()),
-                        }))
-                    }
-                    _ => None,
-                };
-
-
-                send_item(data, ws_out, mut_status)?;
-            }
+            let data = process_file(file_name_path, ext, find_rules);
+            send_item(data, ws_out, mut_status)?;
         }
     }
     Ok(())
 }
+
+
+fn process_file(
+    file_name_path: &str,
+    ext: Option<&str>,
+    find_rules: &FindRules,
+) -> Option<self::proto::MsgOut> {
+    if match_dirfile_name(file_name_path, find_rules) {
+        match ext {
+            Some("html") => {
+                Some(proto::MsgOut::Found(Found {
+                    key0: "LINK".to_owned(),
+                    key1: "html".to_owned(),
+                    item: Item::Link(file_name_path.to_owned()),
+                }))
+            }
+            Some("pdf") => {
+                Some(proto::MsgOut::Found(Found {
+                    key0: "LINK".to_owned(),
+                    key1: "pdf".to_owned(),
+                    item: Item::Link(file_name_path.to_owned()),
+                }))
+            }
+            Some("adoc") => {
+                Some(proto::MsgOut::Found(Found {
+                    key0: "TEXT".to_owned(),
+                    key1: "adoc".to_owned(),
+                    item: Item::Link(file_name_path.to_owned()),
+                }))
+            }
+            Some("dwd") => {
+                Some(proto::MsgOut::Found(Found {
+                    key0: "PLUGIN".to_owned(),
+                    key1: "dwd".to_owned(),
+                    item: Item::Command(file_name_path.to_owned()),
+                }))
+            }
+            _ => None,
+        }
+    } else {
+        None
+    }
+}
+
 
 
 fn match_dirfile_name(dir_name: &str, find_rules: &FindRules) -> bool {
@@ -158,87 +181,112 @@ fn match_dirfile_name(dir_name: &str, find_rules: &FindRules) -> bool {
 
 #[test]
 fn test_match_dirfile_name_and() {
-    assert!(match_dirfile_name("abcdefg",
-                               &FindRules {
-                                   and: vec!["ab".to_owned()],
-                                   not: vec![],
-                               }));
+    assert!(match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned()],
+            not: vec![],
+        }
+    ));
 
-    assert!(match_dirfile_name("abcdefg",
-                               &FindRules {
-                                   and: vec!["ab".to_owned(), "def".to_owned()],
-                                   not: vec![],
-                               }));
+    assert!(match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "def".to_owned()],
+            not: vec![],
+        }
+    ));
 
-    assert!(match_dirfile_name("abcdefg",
-                               &FindRules {
-                                   and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
-                                   not: vec![],
-                               }));
+    assert!(match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
+            not: vec![],
+        }
+    ));
 
-    assert!(!match_dirfile_name("abcdefg",
-                                &FindRules {
-                                    and: vec!["abg".to_owned()],
-                                    not: vec![],
-                                }));
+    assert!(!match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["abg".to_owned()],
+            not: vec![],
+        }
+    ));
 
-    assert!(!match_dirfile_name("abcdefg",
-                                &FindRules {
-                                    and: vec!["ab".to_owned(), "z".to_owned()],
-                                    not: vec![],
-                                }));
+    assert!(!match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "z".to_owned()],
+            not: vec![],
+        }
+    ));
 
-    assert!(!match_dirfile_name("abcdefg",
-                                &FindRules {
-                                    and: vec!["ab".to_owned(), "g".to_owned(), "bd".to_owned()],
-                                    not: vec![],
-                                }));
+    assert!(!match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "g".to_owned(), "bd".to_owned()],
+            not: vec![],
+        }
+    ));
 }
 
 #[test]
 fn test_match_dirfile_name_not() {
-    assert!(match_dirfile_name("abcdefg",
-                               &FindRules {
-                                   and: vec!["ab".to_owned()],
-                                   not: vec!["zz".to_owned()],
-                               }));
+    assert!(match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned()],
+            not: vec!["zz".to_owned()],
+        }
+    ));
 
-    assert!(match_dirfile_name("abcdefg",
-                               &FindRules {
-                                   and: vec!["ab".to_owned(), "def".to_owned()],
-                                   not: vec!["abd".to_owned()],
-                               }));
+    assert!(match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "def".to_owned()],
+            not: vec!["abd".to_owned()],
+        }
+    ));
 
-    assert!(match_dirfile_name("abcdefg",
-                               &FindRules {
-                                   and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
-                                   not: vec!["fag".to_owned(), "ed".to_owned()],
-                               }));
+    assert!(match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
+            not: vec!["fag".to_owned(), "ed".to_owned()],
+        }
+    ));
 
-    assert!(!match_dirfile_name("abcdefg",
-                                &FindRules {
-                                    and: vec!["a".to_owned()],
-                                    not: vec!["ab".to_owned()],
-                                }));
+    assert!(!match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["a".to_owned()],
+            not: vec!["ab".to_owned()],
+        }
+    ));
 
-    assert!(!match_dirfile_name("abcdefg",
-                                &FindRules {
-                                    and: vec!["ab".to_owned(), "def".to_owned()],
-                                    not: vec!["g".to_owned()],
-                                }));
+    assert!(!match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "def".to_owned()],
+            not: vec!["g".to_owned()],
+        }
+    ));
 
-    assert!(!match_dirfile_name("abcdefg",
-                                &FindRules {
-                                    and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
-                                    not: vec!["z".to_owned(), "de".to_owned()],
-                                }));
+    assert!(!match_dirfile_name(
+        "abcdefg",
+        &FindRules {
+            and: vec!["ab".to_owned(), "g".to_owned(), "bcd".to_owned()],
+            not: vec!["z".to_owned(), "de".to_owned()],
+        }
+    ));
 }
 
 
-fn send_item(data: Option<proto::MsgOut>,
-             ws_out: &::ws::Sender,
-             status: &mut FindMutStatus)
-             -> Result<(), String> {
+fn send_item(
+    data: Option<proto::MsgOut>,
+    ws_out: &::ws::Sender,
+    status: &mut FindMutStatus,
+) -> Result<(), String> {
     if status.max_items == 0 {
         return Err("too many items".to_owned());
     }
@@ -262,7 +310,10 @@ fn get_find_rules(s: &str) -> FindRules {
     let tokens = split_string_and_spaces(s);
     for token in tokens {
         let (and_not, tk) = match token.starts_with("-") {
-            true => (&mut find_rules.not, token.chars().skip(1).collect::<String>()),
+            true => (
+                &mut find_rules.not,
+                token.chars().skip(1).collect::<String>(),
+            ),
             false => (&mut find_rules.and, token),
         };
         and_not.push(tk);
@@ -288,11 +339,9 @@ fn split_string_and_spaces(s: &str) -> Vec<String> {
     let mut result = vec![];
     let mut current_token = "".to_owned();
 
-    let push_result = |ct: &mut String, rs: &mut Vec<_>| {
-        if ct != "" {
-            rs.push(ct.clone());
-            ct.clear();
-        }
+    let push_result = |ct: &mut String, rs: &mut Vec<_>| if ct != "" {
+        rs.push(ct.clone());
+        ct.clear();
     };
 
     for (_, c) in s.chars().enumerate() {

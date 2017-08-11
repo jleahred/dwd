@@ -1,0 +1,6 @@
+{ 
+    "command": "cargo build; target/debug/pr_script $PARAM1 $PARAM2", 
+    "params": [ {"Text": "place holder" }, 
+                { "Text": "param2" } 
+              ] 
+}
