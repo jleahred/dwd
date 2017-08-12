@@ -7,9 +7,11 @@
     <span *ngFor="let f1 of f0.value | keys">
           <h3>{{f1.key}}</h3>
       <span *ngFor="let item of f1.value">
-            <!-- <li><button type="button" class="btn btn-link" (mousedown)="onClick(item)">{{getTextItem(item)}}</button></li> -->
-             <li><a href="{{getLinkItem(item)}}" target="_blank">{{getLinkItem(item)}}</a></li>
-      </span>
+            <!-- <span *ngIf=”itemIsLink(item)”> -->
+                <li><a href="{{getLinkItem(item)}}" target="_blank">{{getLinkItem(item)}}</a></li>
+            <!-- </span> -->
+    <!-- <li><button type="button" class="btn btn-link" (mousedown)="onClick(item)">{{getTextItem(item)}}</button></li> -->
+    </span>
     </span>
 
 
