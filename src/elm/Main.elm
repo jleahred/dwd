@@ -1,24 +1,39 @@
 module Main exposing (..)
 
-import Html exposing (..)
+import Dict
+import Html as H
+import Html exposing (Html)
 import Html.Attributes exposing (href, class, style)
 import Material
 import Material.Scheme
 import Material.Button as Button
 import Material.Options as Options exposing (css)
-
 import Material.Layout as Layout
 import Material.Textfield as Textfield
 import Html.Events exposing (on, keyCode, onInput)
 import Json.Decode as Json
 
 
+debug : Bool
+debug =
+    True
+
+
+
+----------------------------------------------------------
 -- MODEL
 
 
+type alias FoundKey =
+    { key0 : String
+    , key1 : String
+    } deriving (Ord,Show)
+
+
 type alias Model =
-    { searchTxt : String
-    , execSearchTxt : String -- "" Means clear find
+    { searchTxt : String -- "" Means clear find
+    , found : Dict.Dict FoundKey String
+    , log : List String
 
     -- Boilerplate: model store for any and all Mdl components you use.
     , mdl :
@@ -29,7 +44,8 @@ type alias Model =
 initModel : Model
 initModel =
     { searchTxt = ""
-    , execSearchTxt = ""
+    , found = Dict.empty
+    , log = []
 
     -- Boilerplate: Always use this initial Mdl model store.
     , mdl =
@@ -37,7 +53,13 @@ initModel =
     }
 
 
+testFillFound : Model -> Model
+testFillFound model =
+    { model | found = Dict.insert { key0 = "asdfasdf", key1 = "aaaa" } "asdfasdf" model.found }
 
+
+
+----------------------------------------------------------
 -- ACTION, UPDATE
 
 
@@ -45,6 +67,7 @@ type Msg
     = SearchTxtModif String
     | ExecuteSearch
       -- Boilerplate: Msg clause for internal Mdl messages.
+    | Test
     | Mdl (Material.Msg Msg)
 
 
@@ -57,17 +80,22 @@ update msg model =
             )
 
         ExecuteSearch ->
-            ( { model | execSearchTxt = model.searchTxt }
+            ( { model | log = ("Execute search " ++ model.searchTxt) :: model.log }
             , Cmd.none
             )
 
-        -- { model | currentText = text }
+        Test ->
+            ( testFillFound model
+            , Cmd.none
+            )
+
         -- Boilerplate: Mdl action handler.
         Mdl msg_ ->
             Material.update Mdl msg_ model
 
 
 
+----------------------------------------------------------
 -- VIEW
 
 
@@ -81,96 +109,36 @@ view model =
         model.mdl
         [ Layout.fixedHeader ]
         { header = header2 model
-            --header = [ viewHeader model ]
         , drawer = drawer
         , tabs = ( [], [] )
-        , main = [ viewBody model ]
+        , main = [ viewBody model, H.text <| toString model.log ]
         }
 
 
--- drawer : List (Html Msg)
--- drawer =
---   [ Layout.title [] [ text "Example drawer" ]
---   , Layout.navigation
---     []
---     [  Layout.link
---         [ Layout.href "https://github.com/debois/elm-mdl" ]
---         [ text "github" ]
---     , Layout.link
---         [ Layout.href "http://package.elm-lang.org/packages/debois/elm-mdl/latest/" ]
---         [ text "elm-package" ]
---     , Layout.link
---         [ Layout.href "#cards"
---         , Options.onClick (Layout.toggleDrawer Mdl)
---         ]
---         [ text "Card component" ]
---     ]
---   ]
-
 drawer : List (Html Msg)
 drawer =
-  [ Layout.title [] [ text "DwD" ]
-  , Layout.navigation
-    []
-    [  Layout.link
-        [ Layout.href "https://github.com/debois/elm-mdl" ]
-        [ text "github" ]
-    , Layout.link
-        [ Layout.href "http://package.elm-lang.org/packages/debois/elm-mdl/latest/" ]
-        [ text "elm-package" ]
-    , Layout.link
-        [ Layout.href "#cards"
-        , Options.onClick (Layout.toggleDrawer Mdl)
+    [ Layout.title [] [ H.text "DwD" ]
+    , Layout.navigation
+        []
+        [ Layout.link
+            [ Layout.href "https://github.com/debois/elm-mdl" ]
+            [ H.text "github" ]
+        , Layout.link
+            [ Layout.href "http://package.elm-lang.org/packages/debois/elm-mdl/latest/" ]
+            [ H.text "elm-package" ]
+        , Layout.link
+            [ Layout.href "#cards"
+            , Options.onClick (Layout.toggleDrawer Mdl)
+            ]
+            [ H.text "Card component" ]
         ]
-        [ text "Card component" ]
     ]
-  ]
 
 
 header2 : Model -> List (Html Msg)
 header2 model =
-    [ Layout.row
-        [ Options.nop
-        , css "transition" "height 333ms ease-in-out 0s"
-        ]
-        --[ Layout.title [] [ text "DwD" ]
-        [ Layout.title
-                [ Layout.href "https://github.com/debois/elm-mdl"]
-                [ span [] [text "DwD"] ]
-        , Layout.spacer
-        , Layout.navigation []
-            [ Layout.link
-                []
-                --[ Options.onClick ToggleHeader]
-                []
-                --[ Icon.i "photo" ]
-            , Layout.link
-                [ Layout.href "https://github.com/debois/elm-mdl"]
-                [ span [] [text "github"] ]
-            , Layout.navigation []
-                [
-                    Textfield.render Mdl
-                        [ 100 ]
-                        model.mdl
-                        [ Textfield.label "Search"
-                        -- , Textfield.floatingLabel
-                        -- , Textfield.expandable "id-of-expandable-100"
-                        -- , Textfield.expandableIcon "search"
-                        -- , Options.onInput Search
-                        -- , Options.onClick SearchClicked
-                        ]
-                        []
-                ]
-            ]
-        ]
-    ]
-
-
--- md 1xx
-viewHeader : Model -> Html Msg
-viewHeader model =
     let
-        onEnter : Msg -> Attribute Msg
+        onEnter : Msg -> H.Attribute Msg
         onEnter msg =
             let
                 isEnter code =
@@ -181,41 +149,45 @@ viewHeader model =
             in
                 on "keydown" (Json.andThen isEnter keyCode)
     in
-        div []
-            [ 
-                h3 [ style [ ( "padding-left", "1rem" ) ] ]
-                [ text "DwD"
-                ,Button.render Mdl [9, 0, 0, 1] model.mdl
-                    [ Button.ripple
-                    , Button.colored
-                    , Button.raised
-                    , Button.link "#"
-                    ]
-                    [ text "DwD"] 
-                , div
-                    [ style [ ( "padding-right", "2rem" ), ( "float", "right" ) ], onInput SearchTxtModif, onEnter ExecuteSearch ]
-                    [ Textfield.render Mdl
-                        [ 100 ]
-                        model.mdl
-                        [ Textfield.label "Search"
-
-                        -- , Textfield.floatingLabel
-                        -- , Textfield.expandable "id-of-expandable-100"
-                        -- , Textfield.expandableIcon "search"
-                        -- , Options.onInput Search
-                        -- , Options.onClick SearchClicked
+        [ Layout.row
+            [ Options.nop
+            , css "transition" "height 333ms ease-in-out 0s"
+            ]
+            [ Layout.title
+                [ Layout.href "https://github.com/debois/elm-mdl" ]
+                [ H.span [] [ H.text "DwD" ] ]
+            , Layout.spacer
+            , Layout.navigation []
+                [ Layout.link
+                    []
+                    []
+                , Layout.link
+                    [ Layout.href "https://github.com/debois/elm-mdl" ]
+                    [ H.span [] [ H.text "github" ] ]
+                , Layout.navigation []
+                    [ H.div [ style [], onInput SearchTxtModif, onEnter ExecuteSearch ]
+                        [ Textfield.render Mdl
+                            [ 100 ]
+                            model.mdl
+                            [ Textfield.label "Search"
+                            ]
+                            []
                         ]
-                        []
+                    , Button.render Mdl
+                        [ 1 ]
+                        model.mdl
+                        [ Options.onClick Test ]
+                        [ H.text "test" ]
                     ]
                 ]
             ]
+        ]
 
 
 viewBody : Model -> Html Msg
 viewBody model =
-    div
-        [ style [ ( "padding", "2rem" ) ] ]
-        [ text ("Sent search: " ++ toString model.execSearchTxt)
+    H.div [ style [ ( "padding", "2rem" ) ] ]
+        [ H.text ("Sent search:  " ++ (toString model))
         ]
         |> Material.Scheme.top
 
