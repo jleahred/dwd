@@ -52,37 +52,22 @@ testFillFound model =
 type Msg
     = SearchTxtModif String
     | ExecuteSearch
-      -- Boilerplate: Msg clause for internal Mdl messages.
     | Test
-    | Mdl (Material.Msg Msg)
 
 
-update : Msg -> MdModel -> ( MdModel, Cmd Msg )
-update msg mdModel =
+update : Msg -> Model -> Model
+update msg model =
     case msg of
         SearchTxtModif txt ->
-            let
-                setSearchTxt model txt =
-                    { model | searchTxt = txt }
-            in
-                ( { mdModel | model =  setSearchTxt mdModel.model txt}
-                , Cmd.none
-                )
+            { model | searchTxt = txt }
 
         ExecuteSearch ->
-            let addLog model txt = { model | log = txt :: model.log } in
-            ( { mdModel | model = addLog mdModel.model <| "Execute search " ++ mdModel.model.searchTxt}
-            , Cmd.none
-            )
+            { model | log = ("Execute search " ++ model.searchTxt) :: model.log }
 
         Test ->
-            ( { mdModel | model = testFillFound mdModel.model }
-            , Cmd.none
-            )
+            testFillFound model
 
-        -- Boilerplate: Mdl action handler.
-        Mdl msg_ ->
-            Material.update Mdl msg_ mdModel
+
 
 
 
@@ -90,24 +75,9 @@ update msg mdModel =
 -- VIEW
 
 
-type alias Mdl =
-    Material.Model
-
-
-view : MdModel -> Html Msg
-view mdModel =
-    Layout.render Mdl
-        mdModel.mdl
-        [ Layout.fixedHeader ]
-        { header = header2 mdModel
-        , drawer = drawer
-        , tabs = ( [], [] )
-        , main = [ viewBody mdModel, H.text <| toString mdModel.model.log ]
-        }
-
-
-drawer : List (Html Msg)
-drawer =
+viewDrawer : Html FMsg
+viewDrawer =
+    H.div []
     [ Layout.title [] [ H.text "DwD" ]
     , Layout.navigation
         []
@@ -119,17 +89,17 @@ drawer =
             [ H.text "elm-package" ]
         , Layout.link
             [ Layout.href "#cards"
-            , Options.onClick (Layout.toggleDrawer Mdl)
+            , Options.onClick (Layout.toggleDrawer MdMsg)
             ]
             [ H.text "Card component" ]
         ]
     ]
 
 
-header2 : MdModel -> List (Html Msg)
-header2 mdModel =
+viewHeader : Model -> MdModel -> Html FMsg
+viewHeader model mdModel =
     let
-        onEnter : Msg -> H.Attribute Msg
+        onEnter : FMsg -> H.Attribute FMsg
         onEnter msg =
             let
                 isEnter code =
@@ -140,6 +110,7 @@ header2 mdModel =
             in
                 on "keydown" (Json.andThen isEnter keyCode)
     in
+        H.div []
         [ Layout.row
             [ Options.nop
             , css "transition" "height 333ms ease-in-out 0s"
@@ -156,18 +127,18 @@ header2 mdModel =
                     [ Layout.href "https://github.com/debois/elm-mdl" ]
                     [ H.span [] [ H.text "github" ] ]
                 , Layout.navigation []
-                    [ H.div [ style [], onInput SearchTxtModif, onEnter ExecuteSearch ]
-                        [ Textfield.render Mdl
+                    [ H.div [ style [], onInput (\txt->Msg (SearchTxtModif txt)), onEnter (Msg ExecuteSearch) ]
+                        [ Textfield.render MdMsg
                             [ 100 ]
-                            mdModel.mdl
+                            mdModel
                             [ Textfield.label "Search"
                             ]
                             []
                         ]
-                    , Button.render Mdl
+                    , Button.render MdMsg
                         [ 1 ]
-                        mdModel.mdl
-                        [ Options.onClick Test ]
+                        mdModel
+                        [ Options.onClick (Msg Test) ]
                         [ H.text "test" ]
                     ]
                 ]
@@ -175,49 +146,102 @@ header2 mdModel =
         ]
 
 
-viewBody : MdModel -> Html Msg
-viewBody mdModel =
+viewBody : Model -> MdModel -> Html FMsg
+viewBody model mdModel =
     H.div [ style [ ( "padding", "2rem" ) ] ]
-        [ H.text ("Sent search:  " ++ (toString mdModel.model))
+        [ H.text ("Sent search:  " ++ (toString model))
         ]
-        |> Material.Scheme.top
 
 
 
--- Load Google Mdl CSS. You'll likely want to do that not in code as we
--- do here, but rather in your master .html file. See the documentation
--- for the `Material` module for details.
 
 
-main : Program Never MdModel Msg
+----------------------------------------------------------
+----------------------------------------------------------
+-- main
+
+main : Program Never FModel FMsg
 main =
     Html.program
-        { init = ( initMdModel, Cmd.none )
-        , view = view
+        { init = ( initFModel, Cmd.none )
+        , view = mdView
         , subscriptions = always Sub.none
-        , update = update
+        , update = mdUpdate
         }
 
 
 
 ----------------------------------------------------------
+----------------------------------------------------------
 -- Material Design
 
-
 type alias MdModel =
+    Material.Model
+
+
+----------------------------------------------------------
+-- MODEL
+
+type alias FModel =
     { model : Model
 
-    -- Boilerplate: model store for any and all Mdl components you use.
+    -- Boilerplate: model store for any and all MdModel components you use.
     , mdl :
-        Material.Model
+        MdModel -- Material.Model
     }
 
 
-initMdModel : MdModel
-initMdModel =
+initFModel : FModel
+initFModel =
     { model = initModel
 
-    -- Boilerplate: Always use this initial Mdl model store.
+    -- Boilerplate: Always use this initial MdModel model store.
     , mdl =
         Material.model
     }
+
+
+----------------------------------------------------------
+-- ACTION, UPDATE
+
+type FMsg
+    = Msg Msg
+      -- Boilerplate: Msg clause for internal MdModel messages.
+    | MdMsg (Material.Msg FMsg)
+
+
+mdUpdate : FMsg -> FModel -> ( FModel, Cmd FMsg )
+mdUpdate msg mdModel =
+    case msg of
+        Msg msg ->
+            ( { mdModel | model = update msg mdModel.model }
+            , Cmd.none
+            )
+
+        -- Boilerplate: MdModel action handler.
+        MdMsg msg_ ->
+            Material.update MdMsg msg_ mdModel
+
+
+----------------------------------------------------------
+-- VIEW
+
+mdView : FModel -> Html FMsg
+mdView fModel =
+    Layout.render MdMsg
+        fModel.mdl
+        [ Layout.fixedHeader ]
+        { header = [viewHeader fModel.model fModel.mdl]
+        , drawer = [viewDrawer]
+        , tabs = ( [], [] )
+        , main = [ mdViewBody fModel ]
+        }
+
+mdViewBody : FModel -> Html FMsg
+mdViewBody fModel =
+    viewBody fModel.model fModel.mdl |> Material.Scheme.top
+
+-- |> Material.Scheme.top
+-- Load Google MdModel CSS. You'll likely want to do that not in code as we
+-- do here, but rather in your master .html file. See the documentation
+-- for the `Material` module for details.
