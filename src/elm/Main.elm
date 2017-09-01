@@ -24,20 +24,10 @@ debug =
 -- MODEL
 
 
-type alias FoundKey =
-    { key0 : String
-    , key1 : String
-    } deriving (Ord,Show)
-
-
 type alias Model =
     { searchTxt : String -- "" Means clear find
-    , found : Dict.Dict FoundKey String
+    , found : Dict.Dict ( String, String ) String
     , log : List String
-
-    -- Boilerplate: model store for any and all Mdl components you use.
-    , mdl :
-        Material.Model
     }
 
 
@@ -46,16 +36,12 @@ initModel =
     { searchTxt = ""
     , found = Dict.empty
     , log = []
-
-    -- Boilerplate: Always use this initial Mdl model store.
-    , mdl =
-        Material.model
     }
 
 
 testFillFound : Model -> Model
 testFillFound model =
-    { model | found = Dict.insert { key0 = "asdfasdf", key1 = "aaaa" } "asdfasdf" model.found }
+    { model | found = Dict.insert ( "asdfasdf", "aaaa" ) "asdfasdf" model.found }
 
 
 
@@ -71,27 +57,32 @@ type Msg
     | Mdl (Material.Msg Msg)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> MdModel -> ( MdModel, Cmd Msg )
+update msg mdModel =
     case msg of
         SearchTxtModif txt ->
-            ( { model | searchTxt = txt }
-            , Cmd.none
-            )
+            let
+                setSearchTxt model txt =
+                    { model | searchTxt = txt }
+            in
+                ( { mdModel | model =  setSearchTxt mdModel.model txt}
+                , Cmd.none
+                )
 
         ExecuteSearch ->
-            ( { model | log = ("Execute search " ++ model.searchTxt) :: model.log }
+            let addLog model txt = { model | log = txt :: model.log } in
+            ( { mdModel | model = addLog mdModel.model <| "Execute search " ++ mdModel.model.searchTxt}
             , Cmd.none
             )
 
         Test ->
-            ( testFillFound model
+            ( { mdModel | model = testFillFound mdModel.model }
             , Cmd.none
             )
 
         -- Boilerplate: Mdl action handler.
         Mdl msg_ ->
-            Material.update Mdl msg_ model
+            Material.update Mdl msg_ mdModel
 
 
 
@@ -103,15 +94,15 @@ type alias Mdl =
     Material.Model
 
 
-view : Model -> Html Msg
-view model =
+view : MdModel -> Html Msg
+view mdModel =
     Layout.render Mdl
-        model.mdl
+        mdModel.mdl
         [ Layout.fixedHeader ]
-        { header = header2 model
+        { header = header2 mdModel
         , drawer = drawer
         , tabs = ( [], [] )
-        , main = [ viewBody model, H.text <| toString model.log ]
+        , main = [ viewBody mdModel, H.text <| toString mdModel.model.log ]
         }
 
 
@@ -135,8 +126,8 @@ drawer =
     ]
 
 
-header2 : Model -> List (Html Msg)
-header2 model =
+header2 : MdModel -> List (Html Msg)
+header2 mdModel =
     let
         onEnter : Msg -> H.Attribute Msg
         onEnter msg =
@@ -168,14 +159,14 @@ header2 model =
                     [ H.div [ style [], onInput SearchTxtModif, onEnter ExecuteSearch ]
                         [ Textfield.render Mdl
                             [ 100 ]
-                            model.mdl
+                            mdModel.mdl
                             [ Textfield.label "Search"
                             ]
                             []
                         ]
                     , Button.render Mdl
                         [ 1 ]
-                        model.mdl
+                        mdModel.mdl
                         [ Options.onClick Test ]
                         [ H.text "test" ]
                     ]
@@ -184,10 +175,10 @@ header2 model =
         ]
 
 
-viewBody : Model -> Html Msg
-viewBody model =
+viewBody : MdModel -> Html Msg
+viewBody mdModel =
     H.div [ style [ ( "padding", "2rem" ) ] ]
-        [ H.text ("Sent search:  " ++ (toString model))
+        [ H.text ("Sent search:  " ++ (toString mdModel.model))
         ]
         |> Material.Scheme.top
 
@@ -198,11 +189,35 @@ viewBody model =
 -- for the `Material` module for details.
 
 
-main : Program Never Model Msg
+main : Program Never MdModel Msg
 main =
     Html.program
-        { init = ( initModel, Cmd.none )
+        { init = ( initMdModel, Cmd.none )
         , view = view
         , subscriptions = always Sub.none
         , update = update
         }
+
+
+
+----------------------------------------------------------
+-- Material Design
+
+
+type alias MdModel =
+    { model : Model
+
+    -- Boilerplate: model store for any and all Mdl components you use.
+    , mdl :
+        Material.Model
+    }
+
+
+initMdModel : MdModel
+initMdModel =
+    { model = initModel
+
+    -- Boilerplate: Always use this initial Mdl model store.
+    , mdl =
+        Material.model
+    }
