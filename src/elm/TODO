@@ -1,0 +1,6 @@
+ModelBody
+    render body depending of ModelBody
+
+model common
+    debug, log
+    pass this model to all modules

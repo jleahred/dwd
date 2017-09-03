@@ -14,7 +14,6 @@ import Material.Color as Color
 -- import Material.Icon as Icon
 import Material.Elevation as Elevation
 
--- Material Design
 
 
 type alias MdModel =
