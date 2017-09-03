@@ -4,7 +4,6 @@ import Html as H
 import Html exposing (Html)
 import Html.Attributes exposing (href, class, style)
 import Material
-import Material.Scheme
 import Material.Button as Button
 import Material.Options as Options exposing (css)
 import Material.Layout as Layout
@@ -106,8 +105,8 @@ viewDrawer =
         ]
 
 
-viewHeader : Model -> MdModel -> Html Msg
-viewHeader model mdModel =
+viewHeader : Model -> Html Msg
+viewHeader model =
     let
         onEnter : Msg -> H.Attribute Msg
         onEnter msg =
@@ -140,14 +139,14 @@ viewHeader model mdModel =
                         [ H.div [ style [], onInput SearchTxtModif, onEnter ExecuteSearch ]
                             [ Textfield.render MdlMsg
                                 [ 100 ]
-                                mdModel
+                                model.mdl
                                 [ Textfield.label "Search"
                                 ]
                                 []
                             ]
                         , Button.render MdlMsg
                             [ 1 ]
-                            mdModel
+                            model.mdl
                             [ Options.onClick Test ]
                             [ H.text "test" ]
                         ]

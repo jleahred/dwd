@@ -1,6 +1,14 @@
-ModelBody
-    render body depending of ModelBody
+reactivate events
+    messages and actions with no mdl
+    msg out and convert them to local messages when necessary
 
 model common
     debug, log
     pass this model to all modules
+
+Found
+    view
+
+websocket json
+
+check material design unique ids

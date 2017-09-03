@@ -10,9 +10,9 @@ import Material.Typography as Typography
 import Material.Options as Options exposing (when, css)
 import Material.Card as Card
 import Material.Color as Color
--- import Material.Button as Button
+import Material.Button as Button
 -- import Material.Icon as Icon
-import Material.Elevation as Elevation
+-- import Material.Elevation as Elevation
 
 
 
@@ -32,12 +32,16 @@ white =
 
 type alias Model =
     { found : Dict.Dict ( String, String ) String
+    , mdl :
+        Material.Model
     }
 
 
 initModel : Model
 initModel =
     { found = Dict.empty
+    , mdl =
+        Material.model
     }
 
 
@@ -52,8 +56,8 @@ testFill model =
 
 
 type Msg
-    = None
-    | Mdl (Material.Msg Msg)
+    = Test
+    | MdlMsg (Material.Msg Msg)
 
 
 
@@ -61,10 +65,16 @@ type Msg
 -- VIEW
 
 
-view : Model -> MdModel -> Html Msg
-view model mdModel =
+view : Model -> Html Msg
+view model =
     H.div [ style [ ( "padding", "2rem" ) ] ]
-        [ Options.styled Html.h4 [ Typography.headline ] [ H.text "Departures" ]
+        [     Button.render MdlMsg
+                            [ 1 ]
+                            model.mdl
+                            [ Options.onClick Test ]
+                            [ H.text "test" ]
+
+        , Options.styled Html.h4 [ Typography.headline ] [ H.text "Departures" ]
         , MList.ul []
             [ MList.li [] [ MList.content [] [ H.text "Elm" ] ]
             , MList.li [] [ MList.content [] [ H.text "F#" ] ]

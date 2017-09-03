@@ -2,17 +2,10 @@ module Main exposing (..)
 
 import Html as H
 import Html exposing (Html)
-import Html.Attributes exposing (href, class, style)
 import Material.Scheme
 import Material.Layout as MLayout
-import Layout 
+import Layout
 import Found
-
-
-debug : Bool
-debug =
-    True
-
 
 
 ----------------------------------------------------------
@@ -35,17 +28,34 @@ main =
 -- MODEL
 
 
+type ModelBody
+    = ModelFound Found.Model
+
+
+type alias ModelCommon =
+    { debug : Bool
+    , log : List String
+    }
+
+
 type alias Model =
     { layout : Layout.Model
-    , found : Found.Model
-    , log : List String
+    , body : ModelBody
+    , common : ModelCommon
     }
 
 
 initModel : Model
 initModel =
     { layout = Layout.initModel
-    , found = Found.initModel
+    , body = ModelFound Found.initModel
+    , common = initCommon
+    }
+
+
+initCommon : ModelCommon
+initCommon =
+    { debug = True
     , log = []
     }
 
@@ -63,9 +73,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LayoutMsg msg -> 
-            let (m, cm) = Layout.update msg model.layout in
-            ({ model | layout = m }, Cmd.map LayoutMsg cm)
+        LayoutMsg msg ->
+            (\( m, cm ) ->
+                ( { model | layout = m }, Cmd.map LayoutMsg cm )
+            )
+                (Layout.update msg model.layout)
 
         FoundMsg _ ->
             ( model
@@ -83,11 +95,13 @@ view model =
     MLayout.render (LayoutMsg << Layout.MdlMsg)
         model.layout.mdl
         [ MLayout.fixedHeader ]
-        { header = [ H.div [] [ H.map LayoutMsg (Layout.viewHeader model.layout model.layout.mdl) ] ]
+        { header = [ H.map LayoutMsg (Layout.viewHeader model.layout) ]
         , drawer = [ H.map LayoutMsg Layout.viewDrawer ]
         , tabs = ( [], [] )
         , main = [ viewBody model |> Material.Scheme.top ]
         }
+
+
 
 -- |> Material.Scheme.top
 -- Load Google MdModel CSS. You'll likely want to do that not in code as we
@@ -97,9 +111,19 @@ view model =
 
 viewBody : Model -> Html Msg
 viewBody model =
-    H.div [ style [ ( "padding", "2rem" ) ] ]
-        [ H.text ("Model: " ++ (toString model))
-        ]
+    let
+        concreteBody model =
+            case model.body of
+                ModelFound mf ->
+                    H.map FoundMsg <| Found.view mf
+    in
+        H.div []
+            [ concreteBody model
+            , H.div [] [ H.text (toString model) ]
+            ]
 
 
 
+-- H.div [ style [ ( "padding", "2rem" ) ] ]
+--     [ H.text ("Model: " ++ (toString model))
+--     ]
