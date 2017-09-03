@@ -5,7 +5,6 @@ import Html exposing (Html)
 import Html.Attributes exposing (href, class, style)
 import Material.Scheme
 import Material.Layout as Layout
-
 import Layout as L
 import Found
 
@@ -16,18 +15,15 @@ debug =
 
 
 
-
-
-
 ----------------------------------------------------------
 ----------------------------------------------------------
 -- main
 
 
-main : Program Never FModel FMsg
+main : Program Never Model Msg
 main =
     Html.program
-        { init = ( initFModel, Cmd.none )
+        { init = ( initModel, Cmd.none )
         , view = mdView
         , subscriptions = always Sub.none
         , update = mdUpdate
@@ -39,15 +35,15 @@ main =
 -- MODEL
 
 
-type alias FModel =
+type alias Model =
     { layout : L.Model
     , found : Found.Model
     , log : List String
     }
 
 
-initFModel : FModel
-initFModel =
+initModel : Model
+initModel =
     { layout = L.initModel
     , found = Found.initModel
     , log = []
@@ -59,12 +55,12 @@ initFModel =
 -- ACTION, UPDATE
 
 
-type FMsg
+type Msg
     = LayoutMsg L.Msg
     | FoundMsg Found.Msg
 
 
-mdUpdate : FMsg -> FModel -> ( FModel, Cmd FMsg )
+mdUpdate : Msg -> Model -> ( Model, Cmd Msg )
 mdUpdate msg mdModel =
     case msg of
         LayoutMsg msg ->
@@ -80,39 +76,30 @@ mdUpdate msg mdModel =
             )
 
 
+
 ----------------------------------------------------------
 -- VIEW
 
 
-mdView : FModel -> Html FMsg
-mdView fModel =
+mdView : Model -> Html Msg
+mdView model =
     Layout.render (LayoutMsg << L.MdlMsg)
-        fModel.layout.mdl
+        model.layout.mdl
         [ Layout.fixedHeader ]
-        { header = [ H.div [] [ H.map LayoutMsg (L.viewHeader fModel.layout fModel.layout.mdl) ] ]
+        { header = [ H.div [] [ H.map LayoutMsg (L.viewHeader model.layout model.layout.mdl) ] ]
         , drawer = [ H.map LayoutMsg L.viewDrawer ]
         , tabs = ( [], [] )
-        , main = [ mdViewBody fModel ]
+        , main = [ mdViewBody model ]
         }
 
 
-mdViewBody : FModel -> Html FMsg
-mdViewBody fModel =
-    --H.div [] [ H.map LayoutMsg (viewBody fModel) |> Material.Scheme.top ]
-    H.div [] [ viewBody fModel |> Material.Scheme.top ]
-
-viewBody : FModel -> Html FMsg
-viewBody model =
+mdViewBody : Model -> Html Msg
+mdViewBody model =
     H.div [ style [ ( "padding", "2rem" ) ] ]
-        --[ H.map (Msg << FoundMsg) (Found.view model.found mdModel)
-        --[ H.map (FoundMsg) (Found.view model.found mdModel)
-
-        --[ FoundMsg (Found.view model.found mdModel)
-        --, 
-        [
-        H.text ("Model: " ++ (toString model))
-        --, H.text (toString model.log)
+        [ H.text ("Model: " ++ (toString model))
+            |> Material.Scheme.top
         ]
+
 
 
 -- |> Material.Scheme.top
