@@ -23,14 +23,13 @@ debug =
 ----------------------------------------------------------
 -- MODEL
 
+
 type alias MdModel =
     Material.Model
 
 
 type alias Model =
     { contentSearchTxt : String
-    , found : Found.Model
-    , log : List String
     -- Boilerplate: model store for any and all MdModel components you use.
     , mdl :
         MdModel
@@ -40,8 +39,6 @@ type alias Model =
 initModel : Model
 initModel =
     { contentSearchTxt = ""
-    , found = Found.initModel
-    , log = []
     -- Boilerplate: Always use this initial MdModel model store.
     , mdl =
         Material.model
@@ -49,8 +46,9 @@ initModel =
 
 
 testFill : Model -> Model
-testFill model =
-    { model | found = Found.testFill model.found }
+testFill model = model
+    --{ model | found = Found.testFill model.found }
+
 
 
 
@@ -62,23 +60,21 @@ type Msg
     = SearchTxtModif String
     | ExecuteSearch
     | Test
-    | FoundMsg Found.Msg
       -- Boilerplate: Msg clause for internal MdModel messages.
     | MdlMsg (Material.Msg Msg)
 
 
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SearchTxtModif txt ->
             ( { model | contentSearchTxt = txt }
             , Cmd.none
             )
-            
 
         ExecuteSearch ->
-            ( { model | log = ("Execute search " ++ model.contentSearchTxt) :: model.log }
+            --( { model | log = ("Execute search " ++ model.contentSearchTxt) :: model.log }
+            ( model
             , Cmd.none
             )
 
@@ -87,13 +83,10 @@ update msg model =
             , Cmd.none
             )
 
-        FoundMsg _ ->
-            ( model
-            , Cmd.none
-            )
-
-        MdlMsg msg_ -> 
+        MdlMsg msg_ ->
             Material.update MdlMsg msg_ model
+
+
 
 ----------------------------------------------------------
 -- VIEW
@@ -174,10 +167,13 @@ viewBody : Model -> MdModel -> Html Msg
 viewBody model mdModel =
     H.div [ style [ ( "padding", "2rem" ) ] ]
         --[ H.map (Msg << FoundMsg) (Found.view model.found mdModel)
-        [ H.map (FoundMsg) (Found.view model.found mdModel)
-        --[ FoundMsg (Found.view model.found mdModel) 
-        , H.text ("Model: " ++ (toString model))
-        , H.text (toString model.log)
+        --[ H.map (FoundMsg) (Found.view model.found mdModel)
+
+        --[ FoundMsg (Found.view model.found mdModel)
+        --, 
+        [
+        H.text ("Model: " ++ (toString model))
+        --, H.text (toString model.log)
         ]
 
 
@@ -201,21 +197,22 @@ main =
 ----------------------------------------------------------
 ----------------------------------------------------------
 -- Material Design
-
-
-
 ----------------------------------------------------------
 -- MODEL
 
 
 type alias FModel =
     { model : Model
+    , found : Found.Model
+    , log : List String
     }
 
 
 initFModel : FModel
 initFModel =
     { model = initModel
+    , found = Found.initModel
+    , log = []
     }
 
 
@@ -226,16 +223,23 @@ initFModel =
 
 type FMsg
     = Msg Msg
+    | FoundMsg Found.Msg
 
 
 mdUpdate : FMsg -> FModel -> ( FModel, Cmd FMsg )
 mdUpdate msg mdModel =
     case msg of
         Msg msg ->
-        let f (mod, cmd_msg) = ({ mdModel | model= mod }, Cmd.map  Msg cmd_msg)
-        in
-         f(update msg mdModel.model)
+            let
+                f ( mod, cmd_msg ) =
+                    ( { mdModel | model = mod }, Cmd.map Msg cmd_msg )
+            in
+                f (update msg mdModel.model)
 
+        FoundMsg _ ->
+            ( mdModel
+            , Cmd.none
+            )
 
 
 ----------------------------------------------------------
@@ -247,7 +251,7 @@ mdView fModel =
     Layout.render (Msg << MdlMsg)
         fModel.model.mdl
         [ Layout.fixedHeader ]
-        { header = [ H.div [] [ H.map Msg (viewHeader fModel.model fModel.model.mdl) ]]
+        { header = [ H.div [] [ H.map Msg (viewHeader fModel.model fModel.model.mdl) ] ]
         , drawer = [ H.map Msg viewDrawer ]
         , tabs = ( [], [] )
         , main = [ mdViewBody fModel ]
@@ -256,7 +260,7 @@ mdView fModel =
 
 mdViewBody : FModel -> Html FMsg
 mdViewBody fModel =
-    H.div [] [ H.map Msg (viewBody fModel.model fModel.model.mdl) |> Material.Scheme.top]
+    H.div [] [ H.map Msg (viewBody fModel.model fModel.model.mdl) |> Material.Scheme.top ]
 
 
 
