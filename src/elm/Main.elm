@@ -23,11 +23,17 @@ debug =
 ----------------------------------------------------------
 -- MODEL
 
+type alias MdModel =
+    Material.Model
+
 
 type alias Model =
     { contentSearchTxt : String
     , found : Found.Model
     , log : List String
+    -- Boilerplate: model store for any and all MdModel components you use.
+    , mdl :
+        MdModel
     }
 
 
@@ -36,6 +42,9 @@ initModel =
     { contentSearchTxt = ""
     , found = Found.initModel
     , log = []
+    -- Boilerplate: Always use this initial MdModel model store.
+    , mdl =
+        Material.model
     }
 
 
@@ -54,30 +63,43 @@ type Msg
     | ExecuteSearch
     | Test
     | FoundMsg Found.Msg
+      -- Boilerplate: Msg clause for internal MdModel messages.
+    | MdlMsg (Material.Msg Msg)
 
 
-update : Msg -> Model -> Model
+
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         SearchTxtModif txt ->
-            { model | contentSearchTxt = txt }
+            ( { model | contentSearchTxt = txt }
+            , Cmd.none
+            )
+            
 
         ExecuteSearch ->
-            { model | log = ("Execute search " ++ model.contentSearchTxt) :: model.log }
+            ( { model | log = ("Execute search " ++ model.contentSearchTxt) :: model.log }
+            , Cmd.none
+            )
 
         Test ->
-            testFill model
+            ( testFill model
+            , Cmd.none
+            )
 
         FoundMsg _ ->
-            model
+            ( model
+            , Cmd.none
+            )
 
-
+        MdlMsg msg_ -> 
+            Material.update MdlMsg msg_ model
 
 ----------------------------------------------------------
 -- VIEW
 
 
-viewDrawer : Html FMsg
+viewDrawer : Html Msg
 viewDrawer =
     H.div []
         [ Layout.title [] [ H.text "DwD" ]
@@ -91,17 +113,17 @@ viewDrawer =
                 [ H.text "elm-package" ]
             , Layout.link
                 [ Layout.href "#cards"
-                , Options.onClick (Layout.toggleDrawer MdMsg)
+                , Options.onClick (Layout.toggleDrawer MdlMsg)
                 ]
                 [ H.text "Card component" ]
             ]
         ]
 
 
-viewHeader : Model -> MdModel -> Html FMsg
+viewHeader : Model -> MdModel -> Html Msg
 viewHeader model mdModel =
     let
-        onEnter : FMsg -> H.Attribute FMsg
+        onEnter : Msg -> H.Attribute Msg
         onEnter msg =
             let
                 isEnter code =
@@ -129,18 +151,18 @@ viewHeader model mdModel =
                         [ Layout.href "https://github.com/debois/elm-mdl" ]
                         [ H.span [] [ H.text "github" ] ]
                     , Layout.navigation []
-                        [ H.div [ style [], onInput (\txt -> Msg (SearchTxtModif txt)), onEnter (Msg ExecuteSearch) ]
-                            [ Textfield.render MdMsg
+                        [ H.div [ style [], onInput SearchTxtModif, onEnter ExecuteSearch ]
+                            [ Textfield.render MdlMsg
                                 [ 100 ]
                                 mdModel
                                 [ Textfield.label "Search"
                                 ]
                                 []
                             ]
-                        , Button.render MdMsg
+                        , Button.render MdlMsg
                             [ 1 ]
                             mdModel
-                            [ Options.onClick (Msg Test) ]
+                            [ Options.onClick Test ]
                             [ H.text "test" ]
                         ]
                     ]
@@ -148,10 +170,12 @@ viewHeader model mdModel =
             ]
 
 
-viewBody : Model -> MdModel -> Html FMsg
+viewBody : Model -> MdModel -> Html Msg
 viewBody model mdModel =
     H.div [ style [ ( "padding", "2rem" ) ] ]
-        [ H.map (Msg << FoundMsg) (Found.view model.found mdModel)
+        --[ H.map (Msg << FoundMsg) (Found.view model.found mdModel)
+        [ H.map (FoundMsg) (Found.view model.found mdModel)
+        --[ FoundMsg (Found.view model.found mdModel) 
         , H.text ("Model: " ++ (toString model))
         , H.text (toString model.log)
         ]
@@ -179,10 +203,6 @@ main =
 -- Material Design
 
 
-type alias MdModel =
-    Material.Model
-
-
 
 ----------------------------------------------------------
 -- MODEL
@@ -190,22 +210,12 @@ type alias MdModel =
 
 type alias FModel =
     { model : Model
-
-    -- Boilerplate: model store for any and all MdModel components you use.
-    , mdl :
-        MdModel
-
-    -- Material.Model
     }
 
 
 initFModel : FModel
 initFModel =
     { model = initModel
-
-    -- Boilerplate: Always use this initial MdModel model store.
-    , mdl =
-        Material.model
     }
 
 
@@ -216,21 +226,15 @@ initFModel =
 
 type FMsg
     = Msg Msg
-      -- Boilerplate: Msg clause for internal MdModel messages.
-    | MdMsg (Material.Msg FMsg)
 
 
 mdUpdate : FMsg -> FModel -> ( FModel, Cmd FMsg )
 mdUpdate msg mdModel =
     case msg of
         Msg msg ->
-            ( { mdModel | model = update msg mdModel.model }
-            , Cmd.none
-            )
-
-        -- Boilerplate: MdModel action handler.
-        MdMsg msg_ ->
-            Material.update MdMsg msg_ mdModel
+        let f (mod, cmd_msg) = ({ mdModel | model= mod }, Cmd.map  Msg cmd_msg)
+        in
+         f(update msg mdModel.model)
 
 
 
@@ -240,11 +244,11 @@ mdUpdate msg mdModel =
 
 mdView : FModel -> Html FMsg
 mdView fModel =
-    Layout.render MdMsg
-        fModel.mdl
+    Layout.render (Msg << MdlMsg)
+        fModel.model.mdl
         [ Layout.fixedHeader ]
-        { header = [ viewHeader fModel.model fModel.mdl ]
-        , drawer = [ viewDrawer ]
+        { header = [ H.div [] [ H.map Msg (viewHeader fModel.model fModel.model.mdl) ]]
+        , drawer = [ H.map Msg viewDrawer ]
         , tabs = ( [], [] )
         , main = [ mdViewBody fModel ]
         }
@@ -252,7 +256,7 @@ mdView fModel =
 
 mdViewBody : FModel -> Html FMsg
 mdViewBody fModel =
-    viewBody fModel.model fModel.mdl |> Material.Scheme.top
+    H.div [] [ H.map Msg (viewBody fModel.model fModel.model.mdl) |> Material.Scheme.top]
 
 
 
