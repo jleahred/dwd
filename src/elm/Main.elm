@@ -79,10 +79,20 @@ update msg model =
             )
                 (Layout.update msg model.layout)
 
-        FoundMsg _ ->
-            ( model
-            , Cmd.none
+        FoundMsg msg ->
+            let modFound modelBody =
+                case modelBody of
+                    ModelFound model -> model
+                    -- _ -> Found.initModel
+            in
+            (\( m ) ->
+                ( { model | body = ModelFound m }, Cmd.none )
             )
+                (Found.update msg <| modFound model.body)
+            -- (\( m, cm ) ->
+            --     ( { model | body = ModelFound m }, Cmd.map FoundMsg cm )
+            -- )
+            --     (Found.update msg <| modFound model.body)
 
 
 
@@ -119,7 +129,7 @@ viewBody model =
     in
         H.div []
             [ concreteBody model
-            , H.div [] [ H.text (toString model) ]
+            , H.div [] [ H.text (toString model.common) ]
             ]
 
 

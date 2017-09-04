@@ -1,6 +1,7 @@
 reactivate events
     messages and actions with no mdl
     msg out and convert them to local messages when necessary
+    simplify update on Main.elm
 
 model common
     debug, log
