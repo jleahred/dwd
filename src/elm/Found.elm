@@ -61,17 +61,17 @@ type Msg
     | MdlMsg (Material.Msg Msg)
 
 
--- update : Msg -> Model -> (Model, Cmd Msg)
--- update msg model =
---     case msg of
---         Test -> (testFill model, Cmd.none)
---         _ -> (model, Cmd.none)
-
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        Test -> testFill model
-        _ -> model
+        Test -> (testFill model, Cmd.none)
+        _ -> (model, Cmd.none)
+
+-- update : Msg -> Model -> Model
+-- update msg model =
+--     case msg of
+--         Test -> testFill model
+--         _ -> model
 
 
 ----------------------------------------------------------

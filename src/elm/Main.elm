@@ -85,14 +85,10 @@ update msg model =
                     ModelFound model -> model
                     -- _ -> Found.initModel
             in
-            (\( m ) ->
-                ( { model | body = ModelFound m }, Cmd.none )
-            )
-                (Found.update msg <| modFound model.body)
-            -- (\( m, cm ) ->
-            --     ( { model | body = ModelFound m }, Cmd.map FoundMsg cm )
-            -- )
-            --     (Found.update msg <| modFound model.body)
+                (\( m, cm ) ->
+                    ( { model | body = ModelFound m }, Cmd.map FoundMsg cm )
+                )
+                    (Found.update msg <| modFound model.body)
 
 
 
