@@ -1,6 +1,7 @@
 module Found exposing (..)
 
-import Dict
+import Dict as Dict
+import Dict exposing (Dict)
 import Html exposing (Html)
 import Html as H
 import Html.Attributes exposing (href, class, style)
@@ -8,22 +9,13 @@ import Material
 import Material.List as MList
 import Material.Typography as Typography
 import Material.Options as Options exposing (when, css)
-import Material.Card as Card
-import Material.Color as Color
+import Material.Elevation as Elevation
 import Material.Button as Button
-
-
--- import Material.Icon as Icon
--- import Material.Elevation as Elevation
+import Material.Typography as Typo
 
 
 type alias MdModel =
     Material.Model
-
-
-white : Options.Property c m
-white =
-    Color.text Color.white
 
 
 
@@ -32,7 +24,7 @@ white =
 
 
 type alias Model =
-    { found : Dict.Dict ( String, String ) String
+    { found : Dict String (Dict String (List String))
     , mdl :
         Material.Model
     }
@@ -41,14 +33,29 @@ type alias Model =
 initModel : Model
 initModel =
     { found = Dict.empty
-    , mdl =
-        Material.model
+    , mdl = Material.model
     }
 
 
 testFill : Model -> Model
 testFill model =
-    { model | found = Dict.insert ( "bbbbbbbbbb", "aaaa" ) "asdfasdf" model.found }
+    { model
+        | found =
+            Dict.fromList
+                [ ( "00000"
+                  , Dict.fromList
+                        [ ( "000222222", [ "00333333333", "00044444444444", "564654" ] )
+                        , ( "000bbbb", [ "000cccc", "000dddd" ] )
+                        ]
+                  )
+                , ( "aaaaa"
+                  , Dict.fromList
+                        [ ( "222222", [ "333333333", "44444444444" ] )
+                        , ( "bbbb", [ "cccc", "dddd" ] )
+                        ]
+                  )
+                ]
+    }
 
 
 
@@ -61,17 +68,15 @@ type Msg
     | MdlMsg (Material.Msg Msg)
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Test -> (testFill model, Cmd.none)
-        _ -> (model, Cmd.none)
+        Test ->
+            ( testFill model, Cmd.none )
 
--- update : Msg -> Model -> Model
--- update msg model =
---     case msg of
---         Test -> testFill model
---         _ -> model
+        _ ->
+            ( model, Cmd.none )
+
 
 
 ----------------------------------------------------------
@@ -86,41 +91,38 @@ view model =
             model.mdl
             [ Options.onClick Test ]
             [ H.text "test" ]
-        , Options.styled Html.h4 [ Typography.headline ] [ H.text "Departures" ]
-        , MList.ul []
-            [ MList.li [] [ MList.content [] [ H.text "Elm" ] ]
-            , MList.li [] [ MList.content [] [ H.text "F#" ] ]
-            , MList.li [] [ MList.content [] [ H.text "Lisp" ] ]
-            ]
-        , Card.view
-            [ Color.background (Color.color Color.Indigo Color.S400)
-            , css "width" "90%"
-
-            --, css "height" "192px"
-            ]
-            [ Card.title [] [ Card.head [ white ] [ H.text "Roskilde Festival asd fasdf dasf asdf dasf asdf dsaf das fasdf" ] ]
-            , Card.text [ white ] [ H.text "Buy tickets before May asdf asdf asdf sadf asdf asdf sadf sadf sad fasd f" ]
-            , Card.actions
-                []
-                --[ Card.border, css "vertical-align" "center", css "text-align" "right", white ]
-                []
-
-            -- [ Button.render Mdl
-            --     [ 8, 1 ]
-            --     mdModel
-            --     [ Button.icon, Button.ripple ]
-            --     [ Icon.i "favorite_border" ]
-            -- , Button.render Mdl
-            --     [ 8, 2 ]
-            --     mdModel
-            --     [ Button.icon, Button.ripple ]
-            --     [ Icon.i "event_available" ]
-            -- ]
-            ]
-        , H.div [] [ H.text (toString { model | mdl = [] } ) ]
+        , H.text (toString { model | mdl = [] })
+        , viewCard "Doc" [ ( "html", [ "pr1.html", "pr2.html" ] ) ]
         ]
 
 
+viewCard : String -> List ( String, List String ) -> Html Msg
+viewCard secTitle scont =
+    let
+        secItems items =
+            MList.ul [] <|
+                List.map (\item -> MList.li [] [ MList.content [] [ H.text item ] ]) items
 
--- [ H.text ("Found:  " ++ (toString model))
--- ]
+        secContent content =
+            MList.ul [] <|
+                List.map
+                    (\( subTitle, items ) ->
+                        MList.li []
+                            [ MList.content []
+                                [ Options.styled H.p
+                                    [ Typo.title ]
+                                    [ H.text subTitle, secItems items ]
+                                ]
+                            ]
+                    )
+                    content
+    in
+        Options.div
+            [ Elevation.e6
+            , css "padding" ".6rem 1.0rem"
+            ]
+            [ Options.styled H.p
+                [ Typo.headline ]
+                [ H.text secTitle ]
+            , secContent scont
+            ]
