@@ -4,7 +4,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Navigation exposing (Location)
+
+
 -- import UrlParser exposing ((</>))
+
 import UrlParser
 import Bootstrap.Navbar as Navbar
 import Bootstrap.Grid as Grid
@@ -23,6 +26,11 @@ main =
         , subscriptions = subscriptions
         , init = init
         }
+
+
+
+-----------------------------------------------
+--  M O D E L
 
 
 type alias Model =
@@ -49,6 +57,11 @@ init location =
             urlUpdate location { navState = navState, page = Home, modalState = Modal.hiddenState }
     in
         ( model, Cmd.batch [ urlCmd, navCmd ] )
+
+
+
+-----------------------------------------------
+--  U P D A T E
 
 
 type Msg
@@ -103,6 +116,11 @@ routeParser =
         ]
 
 
+
+-----------------------------------------------
+--  V I E W
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -119,7 +137,8 @@ menu model =
         |> Navbar.container
         |> Navbar.brand [ href "#" ] [ text "DwD" ]
         |> Navbar.items
-            [ Navbar.itemLink [ href "#getting-started" ] [ text "Getting started" ]
+            [ Navbar.itemLink [ href "#find" ] [ text "Find" ]
+            , Navbar.itemLink [ href "#getting-started" ] [ text "Getting started" ]
             , Navbar.itemLink [ href "#modules" ] [ text "Modules" ]
             ]
         |> Navbar.view model.navState
@@ -201,7 +220,7 @@ pageModules model =
 pageNotFound : List (Html Msg)
 pageNotFound =
     [ h1 [] [ text "Not found" ]
-    , text "SOrry couldn't find that page"
+    , text "Sorry couldn't find that page"
     ]
 
 
