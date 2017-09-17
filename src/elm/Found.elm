@@ -14,6 +14,12 @@ import Material.Button as Button
 import Material.Typography as Typo
 
 
+-- import Tuple exposing (first, second)
+
+import Material.Grid as MGrid
+import Material.Color as MColor
+
+
 type alias MdModel =
     Material.Model
 
@@ -24,10 +30,14 @@ type alias MdModel =
 
 
 type alias Model =
-    { found : Dict String (Dict String (List String))
+    { found : ModelFound
     , mdl :
         Material.Model
     }
+
+
+type alias ModelFound =
+    Dict String (Dict String (List String))
 
 
 initModel : Model
@@ -92,12 +102,68 @@ view model =
             [ Options.onClick Test ]
             [ H.text "test" ]
         , H.text (toString { model | mdl = [] })
-        , viewCard "Doc" [ ( "html", [ "pr1.html", "pr2.html" ] ) ]
+        , viewFound model.found
         ]
 
 
-viewCard : String -> List ( String, List String ) -> Html Msg
-viewCard secTitle scont =
+viewFound : ModelFound -> Html Msg
+viewFound found =
+    let
+        viewL1 =
+            List.map
+                (\( title, dictL2 ) ->
+                    MGrid.grid []
+                        [ MGrid.cell
+                            [ MGrid.size MGrid.All 12
+                            , MColor.background (MColor.color MColor.Blue MColor.S200)
+                            ]
+                            [ Options.styled H.p
+                                [ Typo.headline ]
+                                [ H.text title ]
+                            ]
+                        , MGrid.cell
+                            [ MGrid.size MGrid.All 12 ]
+                            [ viewL2 dictL2 ]
+                        ]
+                 -- H.div [ style [ ( "padding", "0.6rem 0.0rem" ) ] ]
+                 --     [ Options.div
+                 --         [ Elevation.e6
+                 --         , css "padding" ".6rem 1.0rem"
+                 --         ]
+                 --         [ Options.styled H.p
+                 --             [ Typo.headline ]
+                 --             [ H.text title ]
+                 --         , viewL2 dictL2
+                 --         ]
+                 --     ]
+                )
+            <| Dict.toList found
+
+        viewL2 l2 =
+            MList.ul [] <|
+                List.map
+                    (\( subTitle, items ) ->
+                        MList.li []
+                            [ MList.content []
+                                [ Options.styled H.p
+                                    [ Typo.title ]
+                                    [ H.text subTitle, viewL3 items ]
+                                ]
+                            ]
+                    )
+                <|
+                    Dict.toList l2
+
+        viewL3 items =
+            MList.ul [] <|
+                List.map (\item -> MList.li [] [ MList.content [] [ H.text item ] ]) items
+    in
+        H.div []
+            [ H.div [] viewL1 ]
+
+
+viewCard_ : String -> List ( String, List String ) -> Html Msg
+viewCard_ secTitle scont =
     let
         secItems items =
             MList.ul [] <|
