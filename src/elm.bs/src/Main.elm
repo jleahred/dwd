@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Html exposing (..)
+import Html as H
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Navigation exposing (Location)
@@ -12,6 +13,7 @@ import UrlParser
 import Bootstrap.Navbar as Navbar
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
+import Bootstrap.Grid.Row as Row
 import Bootstrap.Card as Card
 import Bootstrap.Button as Button
 import Bootstrap.ListGroup as Listgroup
@@ -163,34 +165,80 @@ mainContent model =
 
 pageHome : Model -> List (Html Msg)
 pageHome model =
-    [ h1 [] [ text "Home" ]
-    , Grid.row []
-        [ Grid.col []
-            [ Card.config [ Card.outlinePrimary ]
-                |> Card.headerH4 [] [ text "Getting started" ]
-                |> Card.block []
-                    [ Card.text [] [ text "Getting started is real easy. Just click the start button." ]
-                    , Card.custom <|
-                        Button.linkButton
-                            [ Button.primary, Button.attrs [ href "#getting-started" ] ]
-                            [ text "Start" ]
-                    ]
-                |> Card.view
+    let
+        rowStyle : Attribute Msg
+        rowStyle =
+            style
+                [ ( "padding-top", ".75rem" )
+                , ( "padding-bottom", ".75rem" )
+                ]
+    in
+        [ h1 [] [ text "Applications" ]
+        , Grid.row [ Row.attrs [ rowStyle ] ]
+            [ Grid.col [ Col.md4 ]
+                [ Card.config [ Card.outlinePrimary ]
+                    |> Card.headerH4 [] [ text "Find" ]
+                    |> Card.block []
+                        [ Card.text [] [ text "Look for documents by name (tags in a future)" ]
+                        , Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ href "#find" ] ]
+                                [ text "Run" ]
+                        ]
+                    |> Card.view
+                ]
+            , Grid.col [Col.md4]
+                [ Card.config [ Card.outlinePrimary ]
+                    |> Card.headerH4 [] [ text "Example option" ]
+                    |> Card.block []
+                        [ Card.text [] [ text "Just an example to test composition" ]
+                        , Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ href "#" ] ]
+                                [ text "Run" ]
+                        ]
+                    |> Card.view
+                ]
+            , Grid.col [Col.md4]
+                [ Card.config [ Card.outlinePrimary ]
+                    |> Card.headerH4 [] [ text "Example option" ]
+                    |> Card.block []
+                        [ Card.text [] [ text "Just an example to test composition" ]
+                        , Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ href "#getting-started" ] ]
+                                [ text "Start" ]
+                        ]
+                    |> Card.view
+                ]
             ]
-        , Grid.col []
-            [ Card.config [ Card.outlineDanger ]
-                |> Card.headerH4 [] [ text "Modules" ]
-                |> Card.block []
-                    [ Card.text [] [ text "Check out the modules overview" ]
-                    , Card.custom <|
-                        Button.linkButton
-                            [ Button.primary, Button.attrs [ href "#modules" ] ]
-                            [ text "Module" ]
-                    ]
-                |> Card.view
+        , Grid.row []
+            [ Grid.col [ Col.md4 ]
+                [ Card.config [ Card.outlineDanger ]
+                    |> Card.headerH4 [] [ text "Modules" ]
+                    |> Card.block []
+                        [ Card.text [] [ text "Check out the modules overview" ]
+                        , Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ href "#modules" ] ]
+                                [ text "Module" ]
+                        ]
+                    |> Card.view
+                ]
+            , Grid.col [ Col.md4 ]
+                [ Card.config [ Card.outlineDanger ]
+                    |> Card.headerH4 [] [ text "Modules" ]
+                    |> Card.block []
+                        [ Card.text [] [ text "Check out the modules overview" ]
+                        , Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ href "#modules" ] ]
+                                [ text "Module" ]
+                        ]
+                    |> Card.view
+                ]
             ]
         ]
-    ]
 
 
 pageGettingStarted : Model -> List (Html Msg)
@@ -242,3 +290,11 @@ modal model =
                 ]
             ]
         |> Modal.view model.modalState
+
+
+rowStyle : Attribute Msg
+rowStyle =
+    style
+        [ ( "padding-top", ".75rem" )
+        , ( "padding-bottom", ".75rem" )
+        ]
