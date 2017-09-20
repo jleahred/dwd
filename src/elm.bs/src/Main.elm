@@ -8,7 +8,10 @@ import UrlParser
 import Bootstrap.Navbar as Navbar
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
+
+
+-- import Bootstrap.Grid.Row as Row
+
 import Bootstrap.Card as Card
 import Bootstrap.Button as Button
 
@@ -35,7 +38,7 @@ init location =
             Navbar.initialState NavMsg
 
         ( model, urlCmd ) =
-            urlUpdate location { navState = navState, page = Home }
+            urlUpdate location { navState = navState, page = Home initHItems }
     in
         ( model, Cmd.batch [ urlCmd, navCmd ] )
 
@@ -57,9 +60,33 @@ type alias Model =
 
 
 type Page
-    = Home
+    = Home (List HItem)
     | FModel Found.Model
     | NotFound
+
+
+type alias HItem =
+    { title : String
+    , desc : String
+    , link : String
+    }
+
+
+initHItems : List HItem
+initHItems =
+    let
+        itemTuples =
+            [ ( "Find", "Look for documents by name (tags in a future)", "#find" )
+            , ( "Example option", "Just an example to test composition", "#none" )
+            , ( "Example option", "Just an example to test composition", "#none" )
+            , ( "Example option", "Just an example to test composition", "#none" )
+            , ( "Modules", "Nothing", "#" )
+            ]
+
+        itemFromTuple ( t, d, l ) =
+            { title = t, desc = d, link = l }
+    in
+        List.map itemFromTuple itemTuples
 
 
 
@@ -108,7 +135,7 @@ decode location =
 routeParser : UrlParser.Parser (Page -> a) a
 routeParser =
     UrlParser.oneOf
-        [ UrlParser.map Home UrlParser.top
+        [ UrlParser.map (Home initHItems) UrlParser.top
         , UrlParser.map (FModel Found.initModel) (UrlParser.s "find")
         ]
 
@@ -142,8 +169,8 @@ mainContent : Model -> Html Msg
 mainContent model =
     Grid.container [] <|
         case model.page of
-            Home ->
-                pageHome model
+            Home items ->
+                pageHome items
 
             NotFound ->
                 pageNotFound
@@ -152,81 +179,33 @@ mainContent model =
                 [ H.div [] [ H.map FoundMsg <| Found.view fmodel ] ]
 
 
-pageHome : Model -> List (Html Msg)
-pageHome model =
+pageHome : List HItem -> List (Html Msg)
+pageHome items =
     let
-        rowStyle : Attribute Msg
-        rowStyle =
+        colStyle : Attribute Msg
+        colStyle =
             style
                 [ ( "padding-top", ".75rem" )
                 , ( "padding-bottom", ".75rem" )
                 ]
+
+        cardFromItem item =
+            Grid.col [ Col.md4, Col.attrs [ colStyle ] ]
+                [ Card.config [ Card.outlinePrimary ]
+                    |> Card.headerH4 [] [ text item.title ]
+                    |> Card.block []
+                        [ Card.text [] [ text item.desc ]
+                        , Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ href item.link ] ]
+                                [ text "Run" ]
+                        ]
+                    |> Card.view
+                ]
     in
         [ h1 [] [ text "Applications" ]
-        , Grid.row [ Row.attrs [ rowStyle ] ]
-            [ Grid.col [ Col.md4 ]
-                [ Card.config [ Card.outlinePrimary ]
-                    |> Card.headerH4 [] [ text "Find" ]
-                    |> Card.block []
-                        [ Card.text [] [ text "Look for documents by name (tags in a future)" ]
-                        , Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ href "#find" ] ]
-                                [ text "Run" ]
-                        ]
-                    |> Card.view
-                ]
-            , Grid.col [ Col.md4 ]
-                [ Card.config [ Card.outlinePrimary ]
-                    |> Card.headerH4 [] [ text "Example option" ]
-                    |> Card.block []
-                        [ Card.text [] [ text "Just an example to test composition" ]
-                        , Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ href "#" ] ]
-                                [ text "Run" ]
-                        ]
-                    |> Card.view
-                ]
-            , Grid.col [ Col.md4 ]
-                [ Card.config [ Card.outlinePrimary ]
-                    |> Card.headerH4 [] [ text "Example option" ]
-                    |> Card.block []
-                        [ Card.text [] [ text "Just an example to test composition" ]
-                        , Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ href "#getting-started" ] ]
-                                [ text "Start" ]
-                        ]
-                    |> Card.view
-                ]
-            ]
-        , Grid.row []
-            [ Grid.col [ Col.md4 ]
-                [ Card.config [ Card.outlineDanger ]
-                    |> Card.headerH4 [] [ text "Modules" ]
-                    |> Card.block []
-                        [ Card.text [] [ text "Check out the modules overview" ]
-                        , Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ href "#modules" ] ]
-                                [ text "Module" ]
-                        ]
-                    |> Card.view
-                ]
-            , Grid.col [ Col.md4 ]
-                [ Card.config [ Card.outlineDanger ]
-                    |> Card.headerH4 [] [ text "Modules" ]
-                    |> Card.block []
-                        [ Card.text [] [ text "Check out the modules overview" ]
-                        , Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ href "#modules" ] ]
-                                [ text "Module" ]
-                        ]
-                    |> Card.view
-                ]
-            ]
+        , Grid.row [] <|
+            List.map cardFromItem items
         ]
 
 
