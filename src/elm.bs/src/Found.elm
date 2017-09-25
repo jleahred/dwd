@@ -4,6 +4,8 @@ import Html exposing (Html)
 import Html as H
 import Html.Attributes as HA
 import Bootstrap.Button as Button
+import Bootstrap.Form.InputGroup as InputGroup
+import Bootstrap.Form.Input as Input
 
 
 -- import Bootstrap.Grid as Grid
@@ -29,7 +31,7 @@ initModel =
 
 
 type Msg
-    = Pending
+    = Find String
 
 
 
@@ -44,6 +46,14 @@ view model =
             [ H.text "Find"
             ]
         , Button.linkButton
-            [ Button.primary, Button.attrs [ HA.href "#find" ] ]
+            [ Button.primary, Button.attrs [ HA.href "#find?lalala" ] ]
             [ H.text "Find" ]
+        , InputGroup.config
+            (InputGroup.text [ Input.placeholder "Search for", Input.onInput Find ])
+            |> InputGroup.successors
+                [ InputGroup.button
+                    [ Button.secondary]
+                    [ H.text "Go!" ]
+                ]
+            |> InputGroup.view
         ]
