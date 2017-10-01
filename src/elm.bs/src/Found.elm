@@ -6,6 +6,8 @@ import Html.Attributes as HA
 import Bootstrap.Button as Button
 import Bootstrap.Form.InputGroup as InputGroup
 import Bootstrap.Form.Input as Input
+import Html.Events as HE
+import Json.Decode as Json
 
 
 -- import Bootstrap.Grid as Grid
@@ -17,12 +19,16 @@ import Bootstrap.Form.Input as Input
 
 
 type alias Model =
-    { items : List String }
+    { params : { searchTxt : String }
+    , items : List String
+    }
 
 
 initModel : Model
 initModel =
-    { items = [] }
+    { params = { searchTxt = "" }
+    , items = []
+    }
 
 
 
@@ -32,11 +38,27 @@ initModel =
 
 type Msg
     = Find String
+    | KeyDown Int
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        Find txt ->
+            model
+
+        KeyDown intKey ->
+            model
 
 
 
 -----------------------------------------------
 --  V I E W
+
+
+onKeyDown : (Int -> msg) -> Input.Option msg
+onKeyDown tagger =
+    Input.attrs [ HE.on "keydown" (Json.map tagger HE.keyCode) ]
 
 
 view : Model -> Html Msg
@@ -47,13 +69,19 @@ view model =
             ]
         , Button.linkButton
             [ Button.primary, Button.attrs [ HA.href "#find?lalala" ] ]
-            [ H.text "Find" ]
+            [ H.text "Test" ]
         , InputGroup.config
-            (InputGroup.text [ Input.placeholder "Search for", Input.onInput Find ])
+            (InputGroup.text
+                [ --Input.value "",
+                  onKeyDown KeyDown
+                , Input.placeholder "Search for"
+                , Input.onInput Find
+                ]
+            )
             |> InputGroup.successors
                 [ InputGroup.button
-                    [ Button.secondary]
-                    [ H.text "Go!" ]
+                    [ Button.secondary ]
+                    [ H.text "Search" ]
                 ]
             |> InputGroup.view
         ]

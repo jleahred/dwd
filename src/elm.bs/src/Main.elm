@@ -97,7 +97,7 @@ initHItems =
 type Msg
     = UrlChange Location
     | NavMsg Navbar.State
-    | FoundMsg Found.Msg
+    | FoundMsg  Found.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -112,7 +112,7 @@ update msg model =
             )
 
         FoundMsg msg ->
-            ( model
+            ( { model | page = FModel <| Found.update msg Found.initModel }
             , Cmd.none
             )
 
@@ -176,7 +176,7 @@ mainContent model =
                 pageNotFound
 
             FModel fmodel ->
-                [ H.div [] [ H.map FoundMsg <| Found.view fmodel ] ]
+                [H.map  FoundMsg <| Found.view fmodel]
 
 
 pageHome : List HItem -> List (Html Msg)
