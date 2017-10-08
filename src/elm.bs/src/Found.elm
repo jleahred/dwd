@@ -6,8 +6,9 @@ import Html.Attributes as HA
 import Bootstrap.Button as Button
 import Bootstrap.Form.InputGroup as InputGroup
 import Bootstrap.Form.Input as Input
-import Html.Events as HE
-import Json.Decode as Json
+-- import Char
+-- import Html.Events as HE
+-- import Json.Decode as Json
 
 
 -- import Bootstrap.Grid as Grid
@@ -18,10 +19,12 @@ import Json.Decode as Json
 --  M O D E L
 
 
-type alias Model =
-    { params : { searchTxt : String }
-    , items : List String
-    }
+type Model
+    = ConfigFind
+    | Found {items: List String }
+    -- { params : { searchTxt : String }
+    -- , items : List String
+    -- }
 
 
 initModel : Model
@@ -38,7 +41,7 @@ initModel =
 
 type Msg
     = Find String
-    | KeyDown Int
+    | AddCharSearch Char
 
 
 update : Msg -> Model -> Model
@@ -47,8 +50,8 @@ update msg model =
         Find txt ->
             model
 
-        KeyDown intKey ->
-            model
+        AddCharSearch ch ->
+            { model | params = { searchTxt = String.cons ch model.params.searchTxt } }
 
 
 
@@ -56,9 +59,9 @@ update msg model =
 --  V I E W
 
 
-onKeyDown : (Int -> msg) -> Input.Option msg
-onKeyDown tagger =
-    Input.attrs [ HE.on "keydown" (Json.map tagger HE.keyCode) ]
+-- onKeyPress : (Int -> msg) -> Input.Option msg
+-- onKeyPress tagger =
+--     Input.attrs [ HE.on "keypress" (Json.map tagger HE.keyCode) ]
 
 
 view : Model -> Html Msg
@@ -73,8 +76,8 @@ view model =
         , InputGroup.config
             (InputGroup.text
                 [ --Input.value "",
-                  onKeyDown KeyDown
-                , Input.placeholder "Search for"
+                  -- onKeyPress AddCharSearch
+                  Input.placeholder "Search for"
                 , Input.onInput Find
                 ]
             )
@@ -84,4 +87,5 @@ view model =
                     [ H.text "Search" ]
                 ]
             |> InputGroup.view
+        , H.text <| toString model
         ]

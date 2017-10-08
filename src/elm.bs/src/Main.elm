@@ -112,9 +112,14 @@ update msg model =
             )
 
         FoundMsg msg ->
-            ( { model | page = FModel <| Found.update msg Found.initModel }
-            , Cmd.none
-            )
+            let fmodel = 
+                case model.page of
+                    FModel fmodel -> fmodel
+                    _ -> Found.initModel
+            in 
+                ( { model | page = FModel <| Found.update msg fmodel }
+                , Cmd.none
+                )
 
 
 urlUpdate : Navigation.Location -> Model -> ( Model, Cmd Msg )
