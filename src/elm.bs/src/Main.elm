@@ -5,6 +5,7 @@ import Html as H
 import Html.Attributes exposing (..)
 import Navigation exposing (Location)
 import UrlParser
+import UrlParser exposing ((<?>))
 import Bootstrap.Navbar as Navbar
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
@@ -18,7 +19,23 @@ import Bootstrap.Button as Button
 
 -- modules
 
-import Found
+import Find
+
+
+type Page
+    = Home (List HItem)
+    | FModel Find.Model
+    | NotFound
+
+
+type Msg
+    = UrlChange Location
+    | NavMsg Navbar.State
+    | FindMsg Find.Msg
+
+
+
+-- main
 
 
 main : Program Never Model Msg
@@ -59,12 +76,6 @@ type alias Model =
     }
 
 
-type Page
-    = Home (List HItem)
-    | FModel Found.Model
-    | NotFound
-
-
 type alias HItem =
     { title : String
     , desc : String
@@ -76,7 +87,7 @@ initHItems : List HItem
 initHItems =
     let
         itemTuples =
-            [ ( "Find", "Look for documents by name (tags in a future)", "#find" )
+            [ ( "Find", "Look for documents by name (tags in a future)", "#findconfig" )
             , ( "Example option", "Just an example to test composition", "#none" )
             , ( "Example option", "Just an example to test composition", "#none" )
             , ( "Example option", "Just an example to test composition", "#none" )
@@ -92,12 +103,10 @@ initHItems =
 
 -----------------------------------------------
 --  U P D A T E
-
-
-type Msg
-    = UrlChange Location
-    | NavMsg Navbar.State
-    | FoundMsg  Found.Msg
+-- type Msg
+--     = UrlChange Location
+--     | NavMsg Navbar.State
+--     | FindMsg Find.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -111,13 +120,17 @@ update msg model =
             , Cmd.none
             )
 
-        FoundMsg msg ->
-            let fmodel = 
-                case model.page of
-                    FModel fmodel -> fmodel
-                    _ -> Found.initModel
-            in 
-                ( { model | page = FModel <| Found.update msg fmodel }
+        FindMsg msg ->
+            let
+                fmodel =
+                    case model.page of
+                        FModel fmodel ->
+                            fmodel
+
+                        _ ->
+                            Find.initModel
+            in
+                ( { model | page = FModel <| Find.update msg fmodel }
                 , Cmd.none
                 )
 
@@ -141,7 +154,11 @@ routeParser : UrlParser.Parser (Page -> a) a
 routeParser =
     UrlParser.oneOf
         [ UrlParser.map (Home initHItems) UrlParser.top
-        , UrlParser.map (FModel Found.initModel) (UrlParser.s "find")
+        , UrlParser.map (FModel Find.initModel) (UrlParser.s "findconfig")
+
+        --, UrlParser.map (FModel Find.execFind) (UrlParser.s "find")
+        --, UrlParser.map (FModel Find.exec "sdfasdf") (UrlParser.s "find" <?> UrlParser.stringParam "txt")
+        , UrlParser.map (FModel Find.exec) (UrlParser.s "find")
         ]
 
 
@@ -165,7 +182,7 @@ menu model =
         |> Navbar.container
         |> Navbar.brand [ href "#" ] [ text "DwD" ]
         |> Navbar.items
-            [ Navbar.itemLink [ href "#find" ] [ text "Find" ]
+            [ Navbar.itemLink [ href "#findconfig" ] [ text "Find" ]
             ]
         |> Navbar.view model.navState
 
@@ -181,7 +198,7 @@ mainContent model =
                 pageNotFound
 
             FModel fmodel ->
-                [H.map  FoundMsg <| Found.view fmodel]
+                [ H.map FindMsg <| Find.view fmodel ]
 
 
 pageHome : List HItem -> List (Html Msg)
@@ -217,5 +234,5 @@ pageHome items =
 pageNotFound : List (Html Msg)
 pageNotFound =
     [ h1 [] [ text "Not found" ]
-    , text "Sorry couldn't find that LOCAL page"
+    , text "Sorry!!! This local page doesn't exists"
     ]
