@@ -1,4 +1,4 @@
-module Main exposing (main, ModModel)
+module Main exposing (main)
 
 import Html exposing (Html)
 import Html as H
@@ -7,100 +7,68 @@ import Navigation exposing (Location)
 import UrlParser
 import UrlParser exposing ((<?>))
 import Bootstrap.Navbar as Navbar
-import Bootstrap.Grid as Grid
+
+
+--
+
+import Pages
 
 
 -----------------------------------------------
------------------------------------------------
--- modules
-
-import NotFound
-import Index
-import Find
-
-
 --  M O D E L
 
 
-type ModModel
-    = NotFoundModel NotFound.Model
-    | IndexModel Index.Model
-    | FindModel Find.Model
+type alias Model =
+    { page : Pages.Model
+    , navState : Navbar.State
+    }
 
 
 
+-----------------------------------------------
 --  U P D A T E
 
 
-type ModMsg
-    = NotFoundMsg NotFound.Msg
-    | IndexMsg Index.Msg
-    | FindMsg Find.Msg
+type Msg
+    = UrlChange Location
+    | NavMsg Navbar.State
+    | PMsg Pages.Msg
 
 
-updateMod : ModMsg -> Model -> ( Model, Cmd Msg )
-updateMod msg model =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
-        FindMsg msg ->
-            let
-                fmodel =
-                    case model.content of
-                        FindModel fmodel ->
-                            fmodel
+        UrlChange location ->
+            urlUpdate location model
 
-                        _ ->
-                            Find.initModel
-            in
-                ( { model | content = FindModel <| Find.update msg fmodel }
-                , Cmd.none
-                )
+        NavMsg state ->
+            ( { model | navState = state }
+            , Cmd.none
+            )
 
-        IndexMsg msg ->
-            ( model, Cmd.none )
-
-        NotFoundMsg _ ->
-            ( model, Cmd.none )
+        PMsg pmsg ->
+            ( { model | page = Pages.update pmsg model.page }
+            , Cmd.none
+            )
 
 
 
+-----------------------------------------------
 --  V I E W
 
 
-viewMod : Model -> Html Msg
-viewMod model =
-    let
-        gridContent =
-            case model.content of
-                NotFoundModel m ->
-                    [ H.map NotFoundMsg <| NotFound.view m ]
-
-                IndexModel m ->
-                    [ H.map IndexMsg <| Index.view m ]
-
-                FindModel m ->
-                    [ H.map FindMsg <| Find.view m ]
-    in
-        H.map MMsg <|
-            Grid.container [] <|
-                gridContent
+view : Model -> Html Msg
+view model =
+    H.div []
+        [ menu model
+        , H.map PMsg <| Pages.view model.page
+        ]
 
 
 
 -----------------------------------------------
 -----------------------------------------------
 -- main
-
-
-routeParser : UrlParser.Parser (ModModel -> a) a
-routeParser =
-    UrlParser.oneOf
-        [ UrlParser.map (IndexModel Index.init) UrlParser.top
-        , UrlParser.map (FindModel Find.initModel) (UrlParser.s "findconfig")
-
-        --, UrlParser.map (FModel Find.execFind) (UrlParser.s "find")
-        --, UrlParser.map (FModel Find.exec "sdfasdf") (UrlParser.s "find" <?> UrlParser.stringParam "txt")
-        , UrlParser.map (FindModel Find.exec) (UrlParser.s "find")
-        ]
 
 
 main : Program Never Model Msg
@@ -120,7 +88,7 @@ init location =
             Navbar.initialState NavMsg
 
         ( model, urlCmd ) =
-            urlUpdate location { navState = navState, content = IndexModel Index.init }
+            urlUpdate location { navState = navState, page = Pages.IndexModel Pages.indexInit }
     in
         ( model, Cmd.batch [ urlCmd, navCmd ] )
 
@@ -132,67 +100,27 @@ subscriptions model =
 
 
 -----------------------------------------------
---  M O D E L
-
-
-type alias Model =
-    { content : ModModel
-    , navState : Navbar.State
-    }
-
-
-
------------------------------------------------
 --  U P D A T E
-
-
-type Msg
-    = UrlChange Location
-    | NavMsg Navbar.State
-    | MMsg ModMsg
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        UrlChange location ->
-            urlUpdate location model
-
-        NavMsg state ->
-            ( { model | navState = state }
-            , Cmd.none
-            )
-
-        MMsg mmsg ->
-            updateMod mmsg model
 
 
 urlUpdate : Navigation.Location -> Model -> ( Model, Cmd Msg )
 urlUpdate location model =
     case decode location of
         Nothing ->
-            ( { model | content = NotFoundModel NotFound.initModel }, Cmd.none )
+            ( { model | page = Pages.NotFoundModel Pages.notFoundInit }, Cmd.none )
 
         Just route ->
-            ( { model | content = route }, Cmd.none )
+            ( { model | page = route }, Cmd.none )
 
 
-decode : Location -> Maybe ModModel
+decode : Location -> Maybe Pages.Model
 decode location =
-    UrlParser.parseHash routeParser location
+    UrlParser.parseHash Pages.routeParser location
 
 
 
 -----------------------------------------------
 --  V I E W
-
-
-view : Model -> Html Msg
-view model =
-    H.div []
-        [ menu model
-        , viewMod model
-        ]
 
 
 menu : Model -> Html Msg
