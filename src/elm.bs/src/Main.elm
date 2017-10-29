@@ -12,6 +12,7 @@ import Bootstrap.Navbar as Navbar
 --
 
 import Pages
+import NavBar
 
 
 -----------------------------------------------

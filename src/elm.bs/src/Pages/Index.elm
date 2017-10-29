@@ -3,18 +3,12 @@ module Index exposing (..)
 import Html as H
 import Html.Attributes as HA
 import Html exposing (Html)
-
-
---
-
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
 import Bootstrap.Button as Button
 
 
---
---
 -----------------------------------------------
 --  M O D E L
 
