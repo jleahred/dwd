@@ -6,8 +6,22 @@ import Html.Attributes as HA
 import Bootstrap.Button as Button
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
+import UrlParser
+import UrlParser exposing ((<?>))
 
 
+routeParser : List (UrlParser.Parser (Model -> c) c)
+routeParser =
+    [ UrlParser.map (Find { txt = "" }) (UrlParser.s "findconfig")
+
+    --, UrlParser.map (FindModel Find.exec) (UrlParser.s "find" <?> UrlParser.stringParam "txt")
+    --, UrlParser.map (FindModel Find.exec) (UrlParser.s "find")
+    ]
+
+
+
+--, UrlParser.map (FindModel Find.exec) (UrlParser.s "find" <?> UrlParser.stringParam "txt")
+--, UrlParser.map (FindModel Find.exec) (UrlParser.s "find")
 -----------------------------------------------
 --  M O D E L
 
