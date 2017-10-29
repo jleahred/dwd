@@ -2,17 +2,15 @@ module Main exposing (main)
 
 import Html exposing (Html)
 import Html as H
-import Html.Attributes as HA
 import Navigation exposing (Location)
 import UrlParser
 import UrlParser exposing ((<?>))
-import Bootstrap.Navbar as Navbar
 
 
---
+-- app modules
 
 import Pages
-import NavBar
+import Menu
 
 
 -----------------------------------------------
@@ -21,7 +19,7 @@ import NavBar
 
 type alias Model =
     { page : Pages.Model
-    , navState : Navbar.State
+    , menu : Menu.Model
     }
 
 
@@ -32,8 +30,8 @@ type alias Model =
 
 type Msg
     = UrlChange Location
-    | NavMsg Navbar.State
-    | PMsg Pages.Msg
+    | MenuMsg Menu.Msg
+    | PageMsg Pages.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -42,12 +40,12 @@ update msg model =
         UrlChange location ->
             urlUpdate location model
 
-        NavMsg state ->
-            ( { model | navState = state }
+        MenuMsg state ->
+            ( { model | menu = Menu.Model <| (Menu.modelFromMsg state).state }
             , Cmd.none
             )
 
-        PMsg pmsg ->
+        PageMsg pmsg ->
             ( { model | page = Pages.update pmsg model.page }
             , Cmd.none
             )
@@ -61,8 +59,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
     H.div []
-        [ menu model
-        , H.map PMsg <| Pages.view model.page
+        [ H.map MenuMsg <| Menu.view model.menu
+        , H.map PageMsg <| Pages.view model.page
         ]
 
 
@@ -85,18 +83,18 @@ main =
 init : Location -> ( Model, Cmd Msg )
 init location =
     let
-        ( navState, navCmd ) =
-            Navbar.initialState NavMsg
+        ( menu, navCmd ) =
+            Menu.init
 
         ( model, urlCmd ) =
-            urlUpdate location { navState = navState, page = Pages.IndexModel Pages.indexInit }
+            urlUpdate location { menu = menu, page = Pages.IndexModel Pages.indexInit }
     in
-        ( model, Cmd.batch [ urlCmd, navCmd ] )
+        ( model, Cmd.batch [ urlCmd, Cmd.map MenuMsg <| navCmd ] )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Navbar.subscriptions model.navState NavMsg
+    Sub.map MenuMsg <| Menu.subscriptions model.menu
 
 
 
@@ -117,20 +115,3 @@ urlUpdate location model =
 decode : Location -> Maybe Pages.Model
 decode location =
     UrlParser.parseHash Pages.routeParser location
-
-
-
------------------------------------------------
---  V I E W
-
-
-menu : Model -> Html Msg
-menu model =
-    Navbar.config NavMsg
-        |> Navbar.withAnimation
-        |> Navbar.container
-        |> Navbar.brand [ HA.href "#" ] [ H.text "DwD" ]
-        |> Navbar.items
-            [ Navbar.itemLink [ HA.href "#findconfig" ] [ H.text "Find" ]
-            ]
-        |> Navbar.view model.navState
