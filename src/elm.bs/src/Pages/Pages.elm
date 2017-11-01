@@ -12,18 +12,15 @@ import UrlParser exposing ((<?>))
 import NotFound
 import Index
 import Find
+import About
 
 
 routeParser : UrlParser.Parser (Model -> a) a
 routeParser =
     UrlParser.oneOf <|
-        [ UrlParser.map (IndexModel Index.init) UrlParser.top
-
-        --, UrlParser.map (FindModel Find.initModel) (UrlParser.s "findconfig")
-        --, UrlParser.map (FindModel Find.exec) (UrlParser.s "find" <?> UrlParser.stringParam "txt")
-        --, UrlParser.map (FindModel Find.exec) (UrlParser.s "find")
-        ]
+        List.map (UrlParser.map IndexModel) Index.routeParser
             ++ List.map (UrlParser.map (FindModel)) Find.routeParser
+            ++ List.map (UrlParser.map (AboutModel)) About.routeParser
 
 
 
@@ -35,6 +32,7 @@ type Model
     = NotFoundModel NotFound.Model
     | IndexModel Index.Model
     | FindModel Find.Model
+    | AboutModel About.Model
 
 
 notFoundInit : NotFound.Model
@@ -56,6 +54,7 @@ type Msg
     = NotFoundMsg NotFound.Msg
     | IndexMsg Index.Msg
     | FindMsg Find.Msg
+    | AboutMsg About.Msg
 
 
 update : Msg -> Model -> Model
@@ -74,6 +73,9 @@ update msg model =
                 FindModel <| Find.update msg fmodel
 
         IndexMsg msg ->
+            model
+
+        AboutMsg msg ->
             model
 
         NotFoundMsg _ ->
@@ -98,6 +100,9 @@ view model =
 
                 FindModel m ->
                     [ H.map FindMsg <| Find.view m ]
+
+                AboutModel m ->
+                    [ H.map AboutMsg <| About.view m ]
     in
         Grid.container [] <|
             gridPage

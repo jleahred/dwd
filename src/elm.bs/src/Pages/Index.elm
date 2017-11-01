@@ -7,6 +7,14 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
 import Bootstrap.Button as Button
+import UrlParser
+import UrlParser exposing ((<?>))
+
+
+routeParser : List (UrlParser.Parser (Model -> c) c)
+routeParser =
+    [ UrlParser.map (init) UrlParser.top ]
+
 
 
 -----------------------------------------------
@@ -26,10 +34,7 @@ init =
     let
         itemTuples =
             [ ( "Find", "Look for documents by name (tags in a future)", "#findconfig" )
-            , ( "Example option", "Just an example to test composition", "#none" )
-            , ( "Example option", "Just an example to test composition", "#none" )
-            , ( "Example option", "Just an example to test composition", "#none" )
-            , ( "Modules", "Nothing", "#" )
+            , ( "About", "Some info about this application", "#about" )
             ]
 
         itemFromTuple ( t, d, l ) =
@@ -69,9 +74,11 @@ view items =
                     |> Card.block []
                         [ Card.text [] [ H.text item.desc ]
                         , Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ HA.href item.link ] ]
-                                [ H.text "Run" ]
+                            H.div [ HA.align "right" ]
+                                [ Button.linkButton
+                                    [ Button.primary, Button.attrs [ HA.href item.link ] ]
+                                    [ H.text "Run" ]
+                                ]
                         ]
                     |> Card.view
                 ]

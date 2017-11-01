@@ -56,9 +56,10 @@ view : Model -> Html Msg
 view model =
     Navbar.config MNavbar
         |> Navbar.withAnimation
+        |> Navbar.fixTop
         |> Navbar.container
         |> Navbar.brand [ HA.href "#" ] [ H.text "DwD" ]
         |> Navbar.items
-            [ Navbar.itemLink [ HA.href "#findconfig" ] [ H.text "Find" ]
+            [ Navbar.itemLink [ HA.href "#about" ] [ H.text "About" ]
             ]
         |> Navbar.view model.state
