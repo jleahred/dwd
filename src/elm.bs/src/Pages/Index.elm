@@ -6,6 +6,7 @@ import Html exposing (Html)
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
+import Bootstrap.Text as Text
 import Bootstrap.Button as Button
 import UrlParser
 import UrlParser exposing ((<?>))
@@ -72,13 +73,12 @@ view items =
                 [ Card.config [ Card.outlinePrimary ]
                     |> Card.headerH4 [] [ H.text item.title ]
                     |> Card.block []
-                        [ Card.text [] [ H.text item.desc ]
-                        , Card.custom <|
-                            H.div [ HA.align "right" ]
-                                [ Button.linkButton
-                                    [ Button.primary, Button.attrs [ HA.href item.link ] ]
-                                    [ H.text "Run" ]
-                                ]
+                        [ Card.text [] [ H.text item.desc ] ]
+                    |> Card.block [ Card.blockAlign Text.alignXsRight ]
+                        [ Card.custom <|
+                            Button.linkButton
+                                [ Button.primary, Button.attrs [ HA.href item.link ] ]
+                                [ H.text "Run" ]
                         ]
                     |> Card.view
                 ]

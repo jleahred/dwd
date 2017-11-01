@@ -6,6 +6,7 @@ import Html exposing (Html)
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
+import Bootstrap.Text as Text
 import UrlParser
 import UrlParser exposing ((<?>))
 import Markdown
@@ -68,9 +69,12 @@ view model =
             [ H.h1 [] [ H.text "About" ]
             , Grid.row [] <|
                 [ Grid.col [ Col.md12, Col.attrs [ colStyle ] ]
-                    [ Card.config [ Card.outlinePrimary ]
-                        |> Card.block []
-                            [ Card.text [ HA.class "text-center" ] <|
+                    [ Card.config []
+                        |> Card.headerH2 [] []
+                        |> Card.block [ Card.blockAlign Text.alignXsCenter ]
+                            [ Card.text
+                                []
+                              <|
                                 [ Markdown.toHtml
                                     []
                                     model.description

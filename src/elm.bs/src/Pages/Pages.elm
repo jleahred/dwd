@@ -4,7 +4,6 @@ import Html exposing (Html)
 import Html as H
 import Bootstrap.Grid as Grid
 import UrlParser
-import UrlParser exposing ((<?>))
 
 
 --
@@ -19,8 +18,8 @@ routeParser : UrlParser.Parser (Model -> a) a
 routeParser =
     UrlParser.oneOf <|
         List.map (UrlParser.map IndexModel) Index.routeParser
-            ++ List.map (UrlParser.map (FindModel)) Find.routeParser
-            ++ List.map (UrlParser.map (AboutModel)) About.routeParser
+            ++ List.map (UrlParser.map FindModel) Find.routeParser
+            ++ List.map (UrlParser.map AboutModel) About.routeParser
 
 
 
