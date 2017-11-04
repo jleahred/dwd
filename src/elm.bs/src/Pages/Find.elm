@@ -6,6 +6,7 @@ import Html.Attributes as HA
 import Bootstrap.Button as Button
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
+import Bootstrap.Grid as Grid
 import UrlParser
 import UrlParser exposing ((<?>))
 
@@ -80,7 +81,7 @@ view model =
                 _ ->
                     []
     in
-        H.div []
+        Grid.container [] <|
             [ H.h1 []
                 [ H.text "Find Config"
                 ]

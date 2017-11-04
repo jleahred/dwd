@@ -7,7 +7,10 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
 import Bootstrap.Text as Text
-import Bootstrap.Button as Button
+
+
+--import Bootstrap.Button as Button
+
 import UrlParser
 import UrlParser exposing ((<?>))
 
@@ -35,6 +38,7 @@ init =
     let
         itemTuples =
             [ ( "Find", "Look for documents by name (tags in a future)", "#findconfig" )
+            , ( "Master Detail", "A small example of master detail page", "#masterdetail" )
             , ( "About", "Some info about this application", "#about" )
             ]
 
@@ -70,21 +74,41 @@ view items =
 
         cardFromItem item =
             Grid.col [ Col.md4, Col.attrs [ colStyle ] ]
-                [ Card.config [ Card.outlinePrimary ]
-                    |> Card.headerH4 [] [ H.text item.title ]
-                    |> Card.block []
-                        [ Card.text [] [ H.text item.desc ] ]
-                    |> Card.block [ Card.blockAlign Text.alignXsRight ]
-                        [ Card.custom <|
-                            Button.linkButton
-                                [ Button.primary, Button.attrs [ HA.href item.link ] ]
-                                [ H.text "Run" ]
+                [ Card.config []
+                    |> Card.headerH4 []
+                        [ H.text item.title
+
+                        -- , H.div [ HA.align "right" ]
+                        --     [ Button.linkButton
+                        --         [ Button.primary, Button.attrs [ HA.href item.link ] ]
+                        --         [ H.text "Run" ]
+                        --     ]
                         ]
+                    |> Card.block []
+                        [ Card.text [] [ H.text item.desc ]
+                        ]
+                    |> Card.block [ Card.blockAlign Text.alignXsRight ]
+                        [ Card.link [ HA.href item.link ] [ H.text "run" ]
+                        ]
+                    -- |> Card.block [ Card.blockAlign Text.alignXsRight ]
+                    --     [ Card.custom <|
+                    --         Button.linkButton
+                    --             [ Button.primary, Button.attrs [ HA.href item.link ] ]
+                    --             [ H.text "Run" ]
+                    --     ]
+                    -- |> Card.footer [ HA.align "right" ]
+                    --     [ Button.linkButton
+                    --         [ Button.primary, Button.attrs [ HA.href item.link ] ]
+                    --         [ H.text "Run" ]
+                    --     ]
                     |> Card.view
                 ]
     in
-        H.div []
-            [ H.h1 [] [ H.text "Applications" ]
+        Grid.container [] <|
+            [ H.h1 []
+                [ H.text "Applications" ]
             , Grid.row [] <|
-                List.map cardFromItem items
+                List.map
+                    cardFromItem
+                    items
             ]

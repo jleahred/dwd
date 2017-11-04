@@ -2,6 +2,7 @@ module NotFound exposing (..)
 
 import Html as H
 import Html exposing (Html)
+import Bootstrap.Grid as Grid
 
 
 --
@@ -35,7 +36,7 @@ type Msg
 
 view : Model -> Html Msg
 view items =
-    H.div []
+    Grid.container [] <|
         [ H.h1 [] [ H.text "Not found" ]
         , H.text "Sorry!!! This local page doesn't exists"
         ]

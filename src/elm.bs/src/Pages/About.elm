@@ -37,6 +37,8 @@ Writted by jlea
 **version**: 0.1
 
 **date**: 2017-11-01
+
+**Powered by**: Elm programming language
         """
     }
 
@@ -65,7 +67,7 @@ view model =
                 , ( "padding-bottom", ".75rem" )
                 ]
     in
-        H.div []
+        Grid.container [] <|
             [ H.h1 [] [ H.text "About" ]
             , Grid.row [] <|
                 [ Grid.col [ Col.md12, Col.attrs [ colStyle ] ]

@@ -56,7 +56,7 @@ view : Model -> Html Msg
 view model =
     Navbar.config MNavbar
         |> Navbar.withAnimation
-        |> Navbar.fixTop
+        --|> Navbar.fixTop
         |> Navbar.container
         |> Navbar.brand [ HA.href "#" ] [ H.text "DwD" ]
         |> Navbar.items

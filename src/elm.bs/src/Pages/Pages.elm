@@ -11,6 +11,7 @@ import UrlParser
 import NotFound
 import Index
 import Find
+import MasterDetail
 import About
 
 
@@ -20,6 +21,7 @@ routeParser =
         List.map (UrlParser.map IndexModel) Index.routeParser
             ++ List.map (UrlParser.map FindModel) Find.routeParser
             ++ List.map (UrlParser.map AboutModel) About.routeParser
+            ++ List.map (UrlParser.map MasterDetailModel) MasterDetail.routeParser
 
 
 
@@ -32,6 +34,7 @@ type Model
     | IndexModel Index.Model
     | FindModel Find.Model
     | AboutModel About.Model
+    | MasterDetailModel MasterDetail.Model
 
 
 notFoundInit : NotFound.Model
@@ -54,6 +57,7 @@ type Msg
     | IndexMsg Index.Msg
     | FindMsg Find.Msg
     | AboutMsg About.Msg
+    | MasterDetailMsg MasterDetail.Msg
 
 
 update : Msg -> Model -> Model
@@ -80,6 +84,9 @@ update msg model =
         NotFoundMsg _ ->
             model
 
+        MasterDetailMsg _ ->
+            model
+
 
 
 -----------------------------------------------
@@ -88,20 +95,39 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
-        gridPage =
-            case model of
-                NotFoundModel m ->
-                    [ H.map NotFoundMsg <| NotFound.view m ]
+    --Grid.container [] <|
+    H.div [] <|
+        case model of
+            NotFoundModel m ->
+                [ H.map NotFoundMsg <| NotFound.view m ]
 
-                IndexModel m ->
-                    [ H.map IndexMsg <| Index.view m ]
+            IndexModel m ->
+                [ H.map IndexMsg <| Index.view m ]
 
-                FindModel m ->
-                    [ H.map FindMsg <| Find.view m ]
+            FindModel m ->
+                [ H.map FindMsg <| Find.view m ]
 
-                AboutModel m ->
-                    [ H.map AboutMsg <| About.view m ]
-    in
-        Grid.container [] <|
-            gridPage
+            AboutModel m ->
+                [ H.map AboutMsg <| About.view m ]
+
+            MasterDetailModel m ->
+                [ H.map MasterDetailMsg <| MasterDetail.view m ]
+
+
+
+-- let
+--     gridPage =
+--         case model of
+--             NotFoundModel m ->
+--                 [ H.map NotFoundMsg <| NotFound.view m ]
+--             IndexModel m ->
+--                 [ H.map IndexMsg <| Index.view m ]
+--             FindModel m ->
+--                 [ H.map FindMsg <| Find.view m ]
+--             AboutModel m ->
+--                 [ H.map AboutMsg <| About.view m ]
+--             MasterDetailModel m ->
+--                 [ H.map MasterDetailMsg <| MasterDetail.view m ]
+-- in
+--     Grid.container [] <|
+--         gridPage
