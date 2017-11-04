@@ -5,9 +5,8 @@ import Html.Attributes as HA
 import Html exposing (Html)
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
-import Bootstrap.Card as Card
-import Bootstrap.Text as Text
 import Bootstrap.Table as Table
+import Bootstrap.Button as Button
 import UrlParser
 import UrlParser exposing ((<?>))
 
@@ -39,7 +38,7 @@ init =
     { master =
         { headers = [ "a", "b", "cc", "d", "e", "f", "g" ]
         , values =
-            [ [ "va", "vb", "vc", "vc", "vc", "vc", "vc" ]
+            [ [ "vaasdfasdfasd", "vb", "vasfasfasfasdfc", "vasfasdfasdffsadfc", "vasdfasfasdfc", "vc", "vasfasfasdfsfdc" ]
             , [ "va", "vb", "vc" ]
             , [ "va", "vb", "vc" ]
             , [ "va", "vb", "vc" ]
@@ -61,12 +60,17 @@ init =
 
 
 type Msg
-    = None
+    = Click
 
 
 
 -----------------------------------------------
 --  V I E W
+
+
+type TableRole
+    = Master
+    | Slave
 
 
 view : Model -> Html Msg
@@ -79,18 +83,24 @@ view model =
                 , ( "padding-bottom", ".75rem" )
                 ]
 
-        gridRow r =
-            r |> List.map (\cell -> Table.td [] [ H.text cell ])
+        gridRow r idx role =
+            (r |> List.map (\cell -> Table.td [] [ H.text cell ]))
+                ++ case role of
+                    Master ->
+                        [ Table.td [] [ Button.button [ Button.secondary ] [ H.text ">" ] ] ]
 
-        table data =
+                    Slave ->
+                        []
+
+        table data role =
             Table.table
-                { options = [ Table.striped, Table.hover ]
+                { options = [ Table.striped ]
                 , thead =
                     Table.simpleThead <|
                         (data.headers |> List.map (\cell -> Table.th [] ([ H.text cell ])))
                 , tbody =
                     Table.tbody [] <|
-                        (data.values |> (List.map (\row -> Table.tr [] (gridRow row))))
+                        (data.values |> (List.map (\row -> Table.tr [] (gridRow row 0 role))))
                 }
     in
         H.div []
@@ -98,20 +108,8 @@ view model =
                 [ H.text "MasterDetail Example" ]
             , Grid.row [] <|
                 [ Grid.col [ Col.md6, Col.attrs [ colStyle ] ]
-                    [ Card.config []
-                        |> Card.block []
-                            [ Card.custom <| table model.master ]
-                        |> Card.block [ Card.blockAlign Text.alignXsRight ]
-                            [ Card.link [ HA.href "item.link" ] [ H.text "run" ] ]
-                        |> Card.view
-                    ]
+                    [ table model.master Master ]
                 , Grid.col [ Col.md6, Col.attrs [ colStyle ] ]
-                    [ Card.config []
-                        |> Card.block []
-                            [ Card.text [] [ H.text "item.desc" ] ]
-                        |> Card.block [ Card.blockAlign Text.alignXsRight ]
-                            [ Card.link [ HA.href "item.link" ] [ H.text "run" ] ]
-                        |> Card.view
-                    ]
+                    [ table model.detail Slave ]
                 ]
             ]
