@@ -44,7 +44,7 @@ notFoundInit =
 
 indexInit : Index.Model
 indexInit =
-    Index.init
+    Index.initModel
 
 
 
@@ -76,7 +76,16 @@ update msg model =
                 FindModel <| Find.update msg fmodel
 
         IndexMsg msg ->
-            model
+            let
+                ( msg_, model_ ) =
+                    case model of
+                        IndexModel model_ ->
+                            ( msg, model_ )
+
+                        _ ->
+                            ( msg, Index.initModel )
+            in
+                IndexModel <| Index.update msg_ model_
 
         AboutMsg msg ->
             model
@@ -84,8 +93,17 @@ update msg model =
         NotFoundMsg _ ->
             model
 
-        MasterDetailMsg _ ->
-            model
+        MasterDetailMsg mdmsg_ ->
+            let
+                ( mdmsg, mdmodel ) =
+                    case model of
+                        MasterDetailModel model ->
+                            ( mdmsg_, model )
+
+                        _ ->
+                            ( mdmsg_, MasterDetail.initModel )
+            in
+                MasterDetailModel <| MasterDetail.update mdmsg mdmodel
 
 
 

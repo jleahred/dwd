@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Html exposing (Html)
 import Html as H
+import Html.Attributes as HA
 import Navigation exposing (Location)
 import UrlParser
 import UrlParser exposing ((<?>))
@@ -60,7 +61,13 @@ view : Model -> Html Msg
 view model =
     H.div []
         [ H.map MenuMsg <| Menu.view model.menu
-        , H.map PageMsg <| Pages.view model.page
+        , H.div
+            [ HA.style
+                [ ( "padding-top", "4.0rem" )
+                , ( "padding-bottom", ".75rem" )
+                ]
+            ]
+            [ H.map PageMsg <| Pages.view model.page ]
         ]
 
 

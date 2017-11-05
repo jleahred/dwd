@@ -3,6 +3,8 @@ module Index exposing (..)
 import Html as H
 import Html.Attributes as HA
 import Html exposing (Html)
+import Html.Events exposing (on)
+import Json.Decode as Json
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
@@ -17,7 +19,7 @@ import UrlParser exposing ((<?>))
 
 routeParser : List (UrlParser.Parser (Model -> c) c)
 routeParser =
-    [ UrlParser.map (init) UrlParser.top ]
+    [ UrlParser.map (initModel) UrlParser.top ]
 
 
 
@@ -33,8 +35,8 @@ type alias Model =
         }
 
 
-init : Model
-init =
+initModel : Model
+initModel =
     let
         itemTuples =
             [ ( "Find", "Look for documents by name (tags in a future)", "#findconfig" )
@@ -54,7 +56,14 @@ init =
 
 
 type Msg
-    = None
+    = Clicked
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        Clicked ->
+            model ++ model
 
 
 
@@ -65,6 +74,9 @@ type Msg
 view : Model -> Html Msg
 view items =
     let
+        onClick msg =
+            on "click" (Json.succeed msg)
+
         colStyle : H.Attribute Msg
         colStyle =
             HA.style
@@ -74,7 +86,7 @@ view items =
 
         cardFromItem item =
             Grid.col [ Col.md4, Col.attrs [ colStyle ] ]
-                [ Card.config []
+                [ Card.config [ Card.attrs <| [ onClick Clicked ] ]
                     |> Card.headerH4 []
                         [ H.text item.title
 
