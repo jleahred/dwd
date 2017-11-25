@@ -1,8 +1,5 @@
+* Gen master detail
 * master detail
     * custom data
     * next previous buttons
-* Index
-    * Custom data
-    * Examples index on separated page
-* parsing routes on find
-* test find filling with data
+* Gen find

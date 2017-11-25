@@ -61,5 +61,6 @@ view model =
         |> Navbar.brand [ HA.href "#" ] [ H.text "DwD" ]
         |> Navbar.items
             [ Navbar.itemLink [ HA.href "#about" ] [ H.text "About" ]
+            , Navbar.itemLink [ HA.href "#tests" ] [ H.text "Tests" ]
             ]
         |> Navbar.view model.state

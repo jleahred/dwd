@@ -2,7 +2,6 @@ module Pages exposing (..)
 
 import Html exposing (Html)
 import Html as H
-import Bootstrap.Grid as Grid
 import UrlParser
 
 
@@ -13,6 +12,10 @@ import Index
 import Find
 import MasterDetail
 import About
+import PagesTests
+
+
+--
 
 
 routeParser : UrlParser.Parser (Model -> a) a
@@ -22,6 +25,7 @@ routeParser =
             ++ List.map (UrlParser.map FindModel) Find.routeParser
             ++ List.map (UrlParser.map AboutModel) About.routeParser
             ++ List.map (UrlParser.map MasterDetailModel) MasterDetail.routeParser
+            ++ List.map (UrlParser.map PagesTestsModel) PagesTests.routeParser
 
 
 
@@ -35,6 +39,7 @@ type Model
     | FindModel Find.Model
     | AboutModel About.Model
     | MasterDetailModel MasterDetail.Model
+    | PagesTestsModel PagesTests.Model
 
 
 notFoundInit : NotFound.Model
@@ -58,6 +63,7 @@ type Msg
     | FindMsg Find.Msg
     | AboutMsg About.Msg
     | MasterDetailMsg MasterDetail.Msg
+    | PagesTestsMsg PagesTests.Msg
 
 
 update : Msg -> Model -> Model
@@ -105,6 +111,18 @@ update msg model =
             in
                 MasterDetailModel <| MasterDetail.update mdmsg mdmodel
 
+        PagesTestsMsg msg ->
+            let
+                ( msg_, model_ ) =
+                    case model of
+                        PagesTestsModel model ->
+                            ( msg, model )
+
+                        _ ->
+                            ( msg, PagesTests.initModel )
+            in
+                PagesTestsModel <| PagesTests.update msg_ model_
+
 
 
 -----------------------------------------------
@@ -130,6 +148,9 @@ view model =
 
             MasterDetailModel m ->
                 [ H.map MasterDetailMsg <| MasterDetail.view m ]
+
+            PagesTestsModel m ->
+                [ H.map PagesTestsMsg <| PagesTests.view m ]
 
 
 

@@ -1,4 +1,4 @@
-module Index exposing (..)
+module IndexTests exposing (..)
 
 import GIndex
 import Html exposing (Html)
@@ -6,9 +6,9 @@ import UrlParser
 import UrlParser exposing ((<?>))
 
 
-routeParser : List (UrlParser.Parser (Model -> c) c)
-routeParser =
-    [ UrlParser.map (initModel) UrlParser.top ]
+routeParserTest : List (UrlParser.Parser (Model -> c) c)
+routeParserTest =
+    [ UrlParser.map (initModel) (UrlParser.s "tests") ]
 
 
 
@@ -16,23 +16,21 @@ routeParser =
 --  M O D E L
 
 
-type alias Model =
-    GIndex.Model
-
-
 initModel : Model
 initModel =
     let
         itemTuples =
-            [ ( "Find", "Look for documents by name (tags in a future)", "#findconfig" )
-            , ( "Master Detail", "A small example of master detail page", "#masterdetail" )
-            , ( "About", "Some info about this application", "#about" )
+            [ ( "GIndex", "This let us create Cards with link", "#test_gindex" )
             ]
 
         itemFromTuple ( t, d, l ) =
             { title = t, desc = d, link = l }
     in
-        { title = "Applications", items = List.map itemFromTuple itemTuples }
+        { title = "Tests", items = List.map itemFromTuple itemTuples }
+
+
+type alias Model =
+    GIndex.Model
 
 
 
