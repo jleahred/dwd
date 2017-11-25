@@ -25,11 +25,16 @@ routeParser =
 
 
 type alias Model =
-    List
-        { title : String
-        , desc : String
-        , link : String
-        }
+    { title : String
+    , items : List IndexItem
+    }
+
+
+type alias IndexItem =
+    { title : String
+    , desc : String
+    , link : String
+    }
 
 
 initModel : Model
@@ -44,7 +49,7 @@ initModel =
         itemFromTuple ( t, d, l ) =
             { title = t, desc = d, link = l }
     in
-        List.map itemFromTuple itemTuples
+        { title = "Applications", items = List.map itemFromTuple itemTuples }
 
 
 
@@ -69,7 +74,7 @@ update msg model =
 
 
 view : Model -> Html Msg
-view items =
+view model =
     let
         onClick msg =
             on "click" (Json.succeed msg)
@@ -103,9 +108,9 @@ view items =
     in
         Grid.container [] <|
             [ H.h1 []
-                [ H.text "Applications" ]
+                [ H.text model.title ]
             , Grid.row [] <|
                 List.map
                     cardFromItem
-                    items
+                    model.items
             ]
