@@ -1,15 +1,16 @@
 module MasterDetail exposing (..)
 
+import Array exposing (Array)
 import Html as H
 import Html.Attributes as HA
 import Html exposing (Html)
+import Html.Events exposing (on)
+import Json.Decode as Json
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Table as Table
 import UrlParser
 import UrlParser exposing ((<?>))
-import Html.Events exposing (on)
-import Json.Decode as Json
 
 
 routeParser : List (UrlParser.Parser (Model -> c) c)
@@ -24,8 +25,8 @@ routeParser =
 
 type alias Model =
     { master : TableInfo
-    , detail : TableInfo
-    , rowClicked : Int
+    , details : Array TableInfo
+    , selectedRow : Int
     }
 
 
@@ -38,22 +39,33 @@ type alias TableInfo =
 initModel : Model
 initModel =
     { master =
-        { headers = [ "a", "b", "cc", "d", "e", "f", "g" ]
+        { headers = [ "a", "b", "c", "d", "e", "f", "g" ]
         , values =
-            [ [ "vaasdfasdfasd", "vb", "vasfasfasfasdfc", "vasfasdfasdffsadfc", "vasdfasfasdfc", "vc", "vasfasfasdfsfdc" ]
-            , [ "va", "vb", "vc" ]
-            , [ "va", "vb", "vc" ]
-            , [ "va", "vb", "vc" ]
-            , [ "va", "vb", "vc" ]
-            , [ "va", "vb", "vc" ]
-            , [ "va", "vb", "vc" ]
+            [ [ "aaaaa", "aaaaa", "aaaaa", "aaaaa", "aaaaa", "aaaaa", "" ]
+            , [ "bbbbb", "bbbbb", "bbbbb", "bbbbb", "bbbbb", "bbbbb", "" ]
+            , [ "ccc", "ccc", "ccc", "ccc", "ccc", "ccc", "" ]
+            , [ "dddd", "dddd", "dddd", "dddd", "dddd", "dddd", "dddd" ]
+            , [ "eeee", "eeee", "", "", "eeee", "", "" ]
+            , [ "ffff", "ffff", "ffff", "ffff", "ffff", "", "" ]
+            , [ "ggggg", "", "", "", "", "ggggg", "" ]
             ]
         }
-    , detail =
-        { headers = [ "a", "b", "c" ]
-        , values = [ [ "va", "vb", "vc" ], [ "va", "vb", "vc" ], [ "va", "vb", "vc" ] ]
-        }
-    , rowClicked = -1
+    , details =
+        Array.fromList
+            [ { headers = [ "a1", "b1", "c1" ]
+              , values = [ [ "11", "22", "33" ], [ "va", "vb", "vc" ], [ "va", "vb", "vc" ] ]
+              }
+            , { headers = [ "aa", "bb", "cc" ]
+              , values = [ [ "ava", "avb", "vc" ], [ "ava", "avb", "avc" ], [ "ava", "avb", "avc" ] ]
+              }
+            , { headers = [ "cca", "ccb", "ccc" ]
+              , values = [ [ "va", "vb", "vc" ], [ "va", "vb", "vc" ], [ "va", "vb", "vc" ] ]
+              }
+            , { headers = [ "a", "b", "c" ]
+              , values = [ [ "va", "vb", "vc" ], [ "va", "vb", "vc" ], [ "va", "vb", "vc" ] ]
+              }
+            ]
+    , selectedRow = 0
     }
 
 
@@ -70,7 +82,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         RowClick row ->
-            { model | rowClicked = row }
+            { model | selectedRow = row }
 
 
 
@@ -105,8 +117,8 @@ view model =
                 rowAttr rowIdx =
                     let
                         rowColor =
-                            if rem rowIdx 2 == 0 then
-                                [ Table.rowWarning ]
+                            if (rowIdx == model.selectedRow) && (role == Master) then
+                                [ Table.rowSuccess ]
                             else
                                 []
                     in
@@ -119,7 +131,7 @@ view model =
                                     []
             in
                 Table.table
-                    { options = [ Table.striped, Table.hover ]
+                    { options = [ Table.hover, Table.bordered ]
                     , thead =
                         Table.simpleThead <|
                             (data.headers |> List.map (\cell -> Table.th [] ([ H.text cell ])))
@@ -136,6 +148,11 @@ view model =
                                    )
                             )
                     }
+
+        empty =
+            { headers = [ "no detail" ]
+            , values = [ [] ]
+            }
     in
         H.div []
             [ H.h1 []
@@ -144,7 +161,10 @@ view model =
                 [ Grid.col [ Col.md6, Col.attrs [ colStyle ] ]
                     [ table model.master Master ]
                 , Grid.col [ Col.md6, Col.attrs [ colStyle ] ]
-                    [ table model.detail Slave ]
+                    [ table
+                        (Maybe.withDefault empty (Array.get model.selectedRow model.details))
+                        Slave
+                    ]
                 ]
             , H.text <| toString model
             ]

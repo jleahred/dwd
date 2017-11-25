@@ -9,10 +9,7 @@ import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Card as Card
 import Bootstrap.Text as Text
-
-
---import Bootstrap.Button as Button
-
+import Bootstrap.Button as Button
 import UrlParser
 import UrlParser exposing ((<?>))
 
@@ -63,7 +60,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Clicked ->
-            model ++ model
+            model
 
 
 
@@ -89,30 +86,18 @@ view items =
                 [ Card.config [ Card.attrs <| [ onClick Clicked ] ]
                     |> Card.headerH4 []
                         [ H.text item.title
-
-                        -- , H.div [ HA.align "right" ]
-                        --     [ Button.linkButton
-                        --         [ Button.primary, Button.attrs [ HA.href item.link ] ]
-                        --         [ H.text "Run" ]
-                        --     ]
                         ]
                     |> Card.block []
                         [ Card.text [] [ H.text item.desc ]
                         ]
                     |> Card.block [ Card.blockAlign Text.alignXsRight ]
-                        [ Card.link [ HA.href item.link ] [ H.text "run" ]
+                        [ Card.custom <|
+                            Button.linkButton
+                                [ Button.secondary
+                                , Button.attrs [ HA.href item.link ]
+                                ]
+                                [ H.text "Run" ]
                         ]
-                    -- |> Card.block [ Card.blockAlign Text.alignXsRight ]
-                    --     [ Card.custom <|
-                    --         Button.linkButton
-                    --             [ Button.primary, Button.attrs [ HA.href item.link ] ]
-                    --             [ H.text "Run" ]
-                    --     ]
-                    -- |> Card.footer [ HA.align "right" ]
-                    --     [ Button.linkButton
-                    --         [ Button.primary, Button.attrs [ HA.href item.link ] ]
-                    --         [ H.text "Run" ]
-                    --     ]
                     |> Card.view
                 ]
     in
