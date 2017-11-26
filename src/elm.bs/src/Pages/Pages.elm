@@ -10,7 +10,6 @@ import UrlParser
 import NotFound
 import Index
 import Find
-import MasterDetail
 import About
 import PagesTests
 
@@ -24,8 +23,24 @@ routeParser =
         List.map (UrlParser.map IndexModel) Index.routeParser
             ++ List.map (UrlParser.map FindModel) Find.routeParser
             ++ List.map (UrlParser.map AboutModel) About.routeParser
-            ++ List.map (UrlParser.map MasterDetailModel) MasterDetail.routeParser
             ++ List.map (UrlParser.map PagesTestsModel) PagesTests.routeParser
+
+
+
+-----------------------------------------------
+--  S U B S C R I P T I O N S
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model of
+        PagesTestsModel model_ ->
+            Sub.batch
+                [ Sub.map PagesTestsMsg <| PagesTests.subscriptions model_
+                ]
+
+        _ ->
+            Sub.batch []
 
 
 
@@ -38,7 +53,6 @@ type Model
     | IndexModel Index.Model
     | FindModel Find.Model
     | AboutModel About.Model
-    | MasterDetailModel MasterDetail.Model
     | PagesTestsModel PagesTests.Model
 
 
@@ -62,7 +76,6 @@ type Msg
     | IndexMsg Index.Msg
     | FindMsg Find.Msg
     | AboutMsg About.Msg
-    | MasterDetailMsg MasterDetail.Msg
     | PagesTestsMsg PagesTests.Msg
 
 
@@ -99,18 +112,6 @@ update msg model =
         NotFoundMsg _ ->
             model
 
-        MasterDetailMsg mdmsg_ ->
-            let
-                ( mdmsg, mdmodel ) =
-                    case model of
-                        MasterDetailModel model ->
-                            ( mdmsg_, model )
-
-                        _ ->
-                            ( mdmsg_, MasterDetail.initModel )
-            in
-                MasterDetailModel <| MasterDetail.update mdmsg mdmodel
-
         PagesTestsMsg msg ->
             let
                 ( msg_, model_ ) =
@@ -146,9 +147,6 @@ view model =
             AboutModel m ->
                 [ H.map AboutMsg <| About.view m ]
 
-            MasterDetailModel m ->
-                [ H.map MasterDetailMsg <| MasterDetail.view m ]
-
             PagesTestsModel m ->
                 [ H.map PagesTestsMsg <| PagesTests.view m ]
 
@@ -170,3 +168,4 @@ view model =
 -- in
 --     Grid.container [] <|
 --         gridPage
+--

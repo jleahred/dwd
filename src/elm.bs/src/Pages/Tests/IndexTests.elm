@@ -21,6 +21,7 @@ initModel =
     let
         itemTuples =
             [ ( "GIndex", "This let us create Cards with link", "#test_gindex" )
+            , ( "GMasterDetail", "Master detail tables", "#test_masterdetail" )
             ]
 
         itemFromTuple ( t, d, l ) =

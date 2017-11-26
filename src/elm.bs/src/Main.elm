@@ -32,7 +32,7 @@ type alias Model =
 type Msg
     = UrlChange Location
     | MenuMsg Menu.Msg
-    | PageMsg Pages.Msg
+    | PagesMsg Pages.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -46,7 +46,7 @@ update msg model =
             , Cmd.none
             )
 
-        PageMsg pmsg ->
+        PagesMsg pmsg ->
             ( { model | page = Pages.update pmsg model.page }
             , Cmd.none
             )
@@ -67,7 +67,7 @@ view model =
                 , ( "padding-bottom", ".75rem" )
                 ]
             ]
-            [ H.map PageMsg <| Pages.view model.page ]
+            [ H.map PagesMsg <| Pages.view model.page ]
         ]
 
 
@@ -99,9 +99,17 @@ init location =
         ( model, Cmd.batch [ urlCmd, Cmd.map MenuMsg <| navCmd ] )
 
 
+
+-----------------------------------------------
+--  S U B S C R I P T I O N S
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map MenuMsg <| Menu.subscriptions model.menu
+    Sub.batch
+        [ Sub.map MenuMsg <| Menu.subscriptions model.menu
+        , Sub.map PagesMsg <| Pages.subscriptions model.page
+        ]
 
 
 

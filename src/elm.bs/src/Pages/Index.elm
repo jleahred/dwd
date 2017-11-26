@@ -25,7 +25,6 @@ initModel =
     let
         itemTuples =
             [ ( "Find", "Look for documents by name (tags in a future)", "#findconfig" )
-            , ( "Master Detail", "A small example of master detail page", "#masterdetail" )
             , ( "About", "Some info about this application", "#about" )
             ]
 

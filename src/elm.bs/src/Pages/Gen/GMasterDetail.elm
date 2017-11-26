@@ -1,6 +1,7 @@
-module MasterDetail exposing (..)
+module GMasterDetail exposing (..)
 
 import Array exposing (Array)
+import Time exposing (Time, second)
 import Html as H
 import Html.Attributes as HA
 import Html exposing (Html)
@@ -13,31 +14,17 @@ import UrlParser
 import UrlParser exposing ((<?>))
 
 
-routeParser : List (UrlParser.Parser (Model -> c) c)
-routeParser =
-    [ UrlParser.map (initModel) (UrlParser.s "masterdetail") ]
-
-
-
 -----------------------------------------------
---  M O D E L
+--  T E S T
 
 
-type alias Model =
-    { master : TableInfo
-    , details : Array TableInfo
-    , selectedRow : Int
-    }
+routeParserTest : List (UrlParser.Parser (Model -> c) c)
+routeParserTest =
+    [ UrlParser.map (emptyModel) (UrlParser.s "test_masterdetail") ]
 
 
-type alias TableInfo =
-    { headers : List String
-    , values : List (List String)
-    }
-
-
-initModel : Model
-initModel =
+initModelTest : Model
+initModelTest =
     { master =
         { headers = [ "a", "b", "c", "d", "e", "f", "g" ]
         , values =
@@ -70,12 +57,51 @@ initModel =
 
 
 
+--  SUBSCRIPTIONS
+
+
+subscriptionsTest : Model -> Sub Msg
+subscriptionsTest model =
+    Sub.batch [ Time.every second (\_ -> Update initModelTest) ]
+
+
+
+-----------------------------------------------
+--  M O D E L
+
+
+emptyModel : Model
+emptyModel =
+    { master = emptyTableInfo, details = Array.fromList [ emptyTableInfo ], selectedRow = 0 }
+
+
+type alias Model =
+    { master : TableInfo
+    , details : Array TableInfo
+    , selectedRow : Int
+    }
+
+
+type alias TableInfo =
+    { headers : List String
+    , values : List (List String)
+    }
+
+
+emptyTableInfo : TableInfo
+emptyTableInfo =
+    { headers = [], values = [ [] ] }
+
+
+
 -----------------------------------------------
 --  U P D A T E
 
 
 type Msg
     = RowClick Int
+    | Tick Time
+    | Update Model
 
 
 update : Msg -> Model -> Model
@@ -83,6 +109,12 @@ update msg model =
     case msg of
         RowClick row ->
             { model | selectedRow = row }
+
+        Update model ->
+            model
+
+        Tick time ->
+            initModelTest
 
 
 
