@@ -10,6 +10,8 @@ import Json.Decode as Json
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Table as Table
+import Bootstrap.Button as Button
+import Bootstrap.ButtonGroup as ButtonGroup
 import UrlParser
 import UrlParser exposing ((<?>))
 
@@ -53,6 +55,7 @@ initModelTest =
               }
             ]
     , selectedRow = 0
+    , pageInfo = Just { page = 1, lastPage = False }
     }
 
 
@@ -62,7 +65,7 @@ initModelTest =
 
 subscriptionsTest : Model -> Sub Msg
 subscriptionsTest model =
-    Sub.batch [ Time.every second (\_ -> Update initModelTest) ]
+    Sub.batch [ Time.every (second * 5) (\_ -> Update initModelTest) ]
 
 
 
@@ -70,21 +73,32 @@ subscriptionsTest model =
 --  M O D E L
 
 
-emptyModel : Model
-emptyModel =
-    { master = emptyTableInfo, details = Array.fromList [ emptyTableInfo ], selectedRow = 0 }
-
-
 type alias Model =
     { master : TableInfo
     , details : Array TableInfo
     , selectedRow : Int
+    , pageInfo : Maybe PageInfo
     }
 
 
 type alias TableInfo =
     { headers : List String
     , values : List (List String)
+    }
+
+
+type alias PageInfo =
+    { page : Int
+    , lastPage : Bool
+    }
+
+
+emptyModel : Model
+emptyModel =
+    { master = emptyTableInfo
+    , details = Array.fromList [ emptyTableInfo ]
+    , selectedRow = 0
+    , pageInfo = Nothing
     }
 
 
@@ -185,6 +199,19 @@ view model =
             { headers = [ "no detail" ]
             , values = [ [] ]
             }
+
+        buttons =
+            case model.pageInfo of
+                Just pageInfo ->
+                    [ ButtonGroup.buttonGroup []
+                        [ ButtonGroup.button [ Button.secondary ] [ H.text "<" ]
+                        , ButtonGroup.button [ Button.secondary ] [ H.text <| "Page: " ++ toString pageInfo.page ]
+                        , ButtonGroup.button [ Button.secondary ] [ H.text ">" ]
+                        ]
+                    ]
+
+                Nothing ->
+                    [ H.div [] [] ]
     in
         H.div []
             [ H.h1 []
@@ -197,6 +224,10 @@ view model =
                         (Maybe.withDefault empty (Array.get model.selectedRow model.details))
                         Slave
                     ]
+                ]
+            , Grid.row [] <|
+                [ Grid.col [ Col.xs1, Col.attrs [ colStyle ] ]
+                    buttons
                 ]
             , H.text <| toString model
             ]
