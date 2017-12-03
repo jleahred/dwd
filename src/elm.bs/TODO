@@ -1,3 +1,8 @@
+* master detail routes doesn't work
+https://stackoverflow.com/questions/43111085/evancz-url-parser-and-multiple-query-parameters
+https://github.com/evancz/url-parser/blob/0607cf332c6116be72e8f1a4d9b7caba498f3e1a/src/UrlParser.elm
+http://package.elm-lang.org/packages/evancz/url-parser/2.0.1/UrlParser
+
 * master detail
     * next previous buttons
         * on click link to next page configuration on url

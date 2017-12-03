@@ -14,15 +14,46 @@ import Bootstrap.Button as Button
 import Bootstrap.ButtonGroup as ButtonGroup
 import UrlParser
 import UrlParser exposing ((<?>))
+import UrlParser exposing ((</>))
 
 
 -----------------------------------------------
 --  T E S T
 
 
+baseRoute : String
+baseRoute =
+    "test_masterdetail"
+
+
+type alias UrlParams =
+    { page : Maybe String, page2 : Maybe String }
+
+
 routeParserTest : List (UrlParser.Parser (Model -> c) c)
 routeParserTest =
-    [ UrlParser.map (emptyModel) (UrlParser.s "test_masterdetail") ]
+    let
+        pi pageNumber =
+            case pageNumber of
+                Just number ->
+                    { page = number, lastPage = True }
+
+                Nothing ->
+                    { page = 22, lastPage = True }
+    in
+        [ --UrlParser.map (emptyModel) (UrlParser.s baseRoute)
+          --,
+          --   UrlParser.map (\pageNumber -> { initModelTest | pageInfo = pi pageNumber })
+          --     (UrlParser.s baseRoute <?> UrlParser.intParam "page")
+          UrlParser.map (\pageNumber -> { initModelTest | pageInfo = pi <| Just 333 })
+            (UrlParser.map
+                UrlParams
+                (UrlParser.s baseRoute <?> UrlParser.stringParam "page" <?> UrlParser.stringParam "page2")
+            )
+
+        --UrlParser.map (\pageNumber -> { initModelTest | pageInfo = pi (Just pageNumber) })
+        --  (UrlParser.s baseRoute </> UrlParser.int)
+        ]
 
 
 emptyModel : Model
@@ -30,7 +61,7 @@ emptyModel =
     { master = emptyTableInfo
     , details = Array.fromList [ emptyTableInfo ]
     , selectedRow = 0
-    , pageInfo = Nothing
+    , pageInfo = page1
     }
 
 
@@ -69,8 +100,13 @@ initModelTest =
               }
             ]
     , selectedRow = 0
-    , pageInfo = Just { page = 1, lastPage = False }
+    , pageInfo = page1
     }
+
+
+page1 : PageInfo
+page1 =
+    { page = 1, lastPage = False }
 
 
 onNextPage : Int -> Msg
@@ -83,7 +119,6 @@ onNextPage currPage =
 
 
 
--- Update { initModelTest | pageInfo = Just { page = nextPage, lastPage = nextPage == 3 } }
 --  SUBSCRIPTIONS
 
 
@@ -92,12 +127,7 @@ subscriptionsTest model =
     Sub.batch
         [ Time.every (second * 2)
             (\_ ->
-                case model.pageInfo of
-                    Just _ ->
-                        Update model
-
-                    Nothing ->
-                        Update initModelTest
+                Update model
             )
         ]
 
@@ -111,7 +141,7 @@ type alias Model =
     { master : TableInfo
     , details : Array TableInfo
     , selectedRow : Int
-    , pageInfo : Maybe PageInfo
+    , pageInfo : PageInfo
     }
 
 
@@ -216,30 +246,25 @@ view model =
             , values = [ [] ]
             }
 
-        buttons =
-            case model.pageInfo of
-                Just pageInfo ->
-                    [ ButtonGroup.linkButtonGroup []
-                        [ ButtonGroup.linkButton
-                            [ Button.secondary
-                            , Button.disabled <| pageInfo.page == 1
-                            ]
-                            [ H.text "<" ]
-                        , ButtonGroup.linkButton
-                            [ Button.secondary
-                            ]
-                            [ H.text <| "Page: " ++ toString pageInfo.page ]
-                        , ButtonGroup.linkButton
-                            [ Button.secondary
-                            , Button.disabled pageInfo.lastPage
-                            , Button.attrs [ HA.href "#pending..." ]
-                            ]
-                            [ H.text ">" ]
-                        ]
+        buttons pageInfo =
+            [ ButtonGroup.linkButtonGroup []
+                [ ButtonGroup.linkButton
+                    [ Button.secondary
+                    , Button.disabled <| pageInfo.page == 1
                     ]
-
-                Nothing ->
-                    [ H.div [] [] ]
+                    [ H.text "<" ]
+                , ButtonGroup.linkButton
+                    [ Button.secondary
+                    ]
+                    [ H.text <| "Page: " ++ toString pageInfo.page ]
+                , ButtonGroup.linkButton
+                    [ Button.secondary
+                    , Button.disabled pageInfo.lastPage
+                    , Button.attrs [ HA.href <| "#" ++ baseRoute ++ "/?page=" ++ (toString pageInfo.page) ]
+                    ]
+                    [ H.text ">" ]
+                ]
+            ]
     in
         H.div []
             [ H.h1 []
@@ -255,7 +280,7 @@ view model =
                 ]
             , Grid.row [] <|
                 [ Grid.col [ Col.md6, Col.attrs [ colStyle ] ]
-                    [ H.div [ HA.align "center" ] buttons ]
+                    [ H.div [ HA.align "center" ] (buttons model.pageInfo) ]
                 ]
             , H.text <| toString model
             ]
