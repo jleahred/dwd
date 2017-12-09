@@ -26,33 +26,25 @@ baseRoute =
     "test_masterdetail"
 
 
-type alias UrlParams =
-    { page : Maybe String, page2 : Maybe String }
+type alias UrlInfo =
+    { page : Int }
 
 
 routeParserTest : List (UrlParser.Parser (Model -> c) c)
 routeParserTest =
     let
-        pi pageNumber =
-            case pageNumber of
-                Just number ->
-                    { page = number, lastPage = True }
-
-                Nothing ->
-                    { page = 22, lastPage = True }
+        pageInformation pageNumber =
+            { page = pageNumber, lastPage = False }
     in
-        [ --UrlParser.map (emptyModel) (UrlParser.s baseRoute)
-          --,
-          --   UrlParser.map (\pageNumber -> { initModelTest | pageInfo = pi pageNumber })
-          --     (UrlParser.s baseRoute <?> UrlParser.intParam "page")
-          UrlParser.map (\pageNumber -> { initModelTest | pageInfo = pi <| Just 333 })
+        [ UrlParser.map (initModelTest) (UrlParser.s baseRoute)
+        , UrlParser.map (\urlInfo -> { initModelTest | pageInfo = pageInformation urlInfo.page })
             (UrlParser.map
-                UrlParams
-                (UrlParser.s baseRoute <?> UrlParser.stringParam "page" <?> UrlParser.stringParam "page2")
+                UrlInfo
+                (UrlParser.s baseRoute
+                    </> UrlParser.s "page"
+                    </> UrlParser.int
+                )
             )
-
-        --UrlParser.map (\pageNumber -> { initModelTest | pageInfo = pi (Just pageNumber) })
-        --  (UrlParser.s baseRoute </> UrlParser.int)
         ]
 
 

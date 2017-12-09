@@ -7,3 +7,12 @@ http://package.elm-lang.org/packages/evancz/url-parser/2.0.1/UrlParser
     * next previous buttons
         * on click link to next page configuration on url
 * Gen find
+
+
+
+Navigation commands
+
+https://github.com/sporto/elm-navigation-pushstate-example/blob/master/src/Main.elm
+
+parsePath (map SearchParams (s "blog" <?> stringParam "search" <?> stringParam "sortBy")) (Location "" "" "" "" "" "" "/blog" "?search=cats&sortBy=name" "" "" "")
+Just { search = Just "cats", sortBy = Just "name" }
