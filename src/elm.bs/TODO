@@ -1,7 +1,17 @@
-* master detail routes doesn't work
-https://stackoverflow.com/questions/43111085/evancz-url-parser-and-multiple-query-parameters
-https://github.com/evancz/url-parser/blob/0607cf332c6116be72e8f1a4d9b7caba498f3e1a/src/UrlParser.elm
-http://package.elm-lang.org/packages/evancz/url-parser/2.0.1/UrlParser
+* master detail routes 
+
+This is considered good, but it's missing to parse and use the page on route
+
+It would be interested on accept multiple routes to parse here
+
+urlParser : UrlParser.Parser (Int -> a) a
+urlParser =
+    UrlParser.s baseRoute
+        </> UrlParser.s "page"
+        </> UrlParser.int
+
+
+http://localhost:3000/#test_masterdetail/mastdetall/page/22
 
 * master detail
     * next previous buttons

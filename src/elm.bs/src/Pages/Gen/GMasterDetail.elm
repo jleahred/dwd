@@ -18,34 +18,24 @@ import UrlParser exposing ((</>))
 
 
 -----------------------------------------------
+-----------------------------------------------
 --  T E S T
 
 
-baseRoute : String
-baseRoute =
+baseRouteTest : String
+baseRouteTest =
     "test_masterdetail"
-
-
-type alias UrlInfo =
-    { page : Int }
 
 
 routeParserTest : List (UrlParser.Parser (Model -> c) c)
 routeParserTest =
-    let
-        pageInformation pageNumber =
-            { page = pageNumber, lastPage = False }
-    in
-        [ UrlParser.map (initModelTest) (UrlParser.s baseRoute)
-        , UrlParser.map (\urlInfo -> { initModelTest | pageInfo = pageInformation urlInfo.page })
-            (UrlParser.map
-                UrlInfo
-                (UrlParser.s baseRoute
-                    </> UrlParser.s "page"
-                    </> UrlParser.int
-                )
-            )
-        ]
+    [ UrlParser.map (emptyModel)
+        (UrlParser.s baseRouteTest)
+    , UrlParser.map (\route -> emptyModel)
+        (UrlParser.s baseRouteTest
+            </> urlParser
+        )
+    ]
 
 
 emptyModel : Model
@@ -101,15 +91,6 @@ page1 =
     { page = 1, lastPage = False }
 
 
-onNextPage : Int -> Msg
-onNextPage currPage =
-    let
-        nextPage =
-            currPage + 1
-    in
-        Update initModelTest
-
-
 
 --  SUBSCRIPTIONS
 
@@ -125,6 +106,48 @@ subscriptionsTest model =
 
 
 
+--  T E S T
+-----------------------------------------------
+-----------------------------------------------
+--
+-----------------------------------------------
+--  ROUTE
+
+
+baseRoute : String
+baseRoute =
+    "mastdetall"
+
+
+type alias UrlInfo =
+    { page : Int }
+
+
+urlParser : UrlParser.Parser (Int -> a) a
+urlParser =
+    UrlParser.s baseRoute
+        </> UrlParser.s "page"
+        </> UrlParser.int
+
+
+
+-- routeParser : List (UrlParser.Parser (Model -> c) c)
+-- routeParser =
+--     let
+--         pageInformation pageNumber =
+--             { page = pageNumber, lastPage = False }
+--     in
+--         [ UrlParser.map (initModelTest) UrlParser.top
+--         , UrlParser.map (initModelTest) (UrlParser.s baseRoute)
+--         , UrlParser.map (\urlInfo -> { initModelTest | pageInfo = pageInformation urlInfo.page })
+--             (UrlParser.map
+--                 UrlInfo
+--                 (UrlParser.s baseRoute
+--                     </> UrlParser.s "page"
+--                     </> UrlParser.int
+--                 )
+--             )
+--         ]
 -----------------------------------------------
 --  M O D E L
 
